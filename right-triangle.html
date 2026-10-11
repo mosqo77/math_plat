@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직각삼각형이 될 조건 탐구관 | SciMath Hub</title>
+    <meta name="description" content="세 변의 길이와 피타고라스 정리의 역을 이용한 직각삼각형 판별, 예각·직각·둔각삼각형 조건 인터랙티브 시뮬레이션">
+
+    <!-- 테일윈드 CSS (Tailwind CSS CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 프리텐다드 웹 폰트 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* 캔버스 테두리 */
+        #triangleCanvas {
+            background-color: #ffffff;
+            touch-action: none;
+        }
+
+        /* 실시간 저울/게이지 바 트랜지션 */
+        .gauge-transition {
+            transition: width 0.25s ease, background-color 0.25s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ======================================================================
+         공통 상단 내비게이션 바 (SciMath Hub 공통 헤더)
+         ====================================================================== -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- 좌측: 로고 및 로비(index.html) 복귀 버튼 -->
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg p-1" title="메인 로비(전체 탐구 목록)로 이동">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+                        <span class="text-base">📐</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 group-hover:text-brand-600 transition-colors">SciMath Hub</span>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-100">수학·과학</span>
+                        </div>
+                    </div>
+                </a>
+
+                <span class="text-slate-300 hidden sm:inline">|</span>
+
+                <!-- 전체 탐구 목록 버튼 -->
+                <a href="index.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors">
+                    <span>←</span>
+                    <span class="hidden sm:inline">전체 탐구 목록</span>
+                    <span class="sm:hidden">목록</span>
+                </a>
+            </div>
+
+            <!-- 중앙: 현재 탐구 표시 배지 -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span>Math 02 : 직각삼각형이 될 조건 탐구관</span>
+            </div>
+
+            <!-- 우측: 이전(이차함수) / 다음(주기율표) 빠른 이동 버튼 -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="function-graph.html" 
+                   class="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-colors">
+                    <span>←</span>
+                    <span class="hidden sm:inline">이전 (이차함수)</span>
+                    <span class="sm:hidden">이차함수</span>
+                </a>
+
+                <a href="periodic-table.html" 
+                   class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 shadow-md shadow-indigo-200 transition-all hover:translate-x-0.5">
+                    <span>다음 (주기율표)</span>
+                    <span class="text-base">→</span>
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ======================================================================
+         상단 수업 안내 배너 (Lesson Intro)
+         ====================================================================== -->
+    <section class="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-5">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-100 text-indigo-700">중2 / 고1 기하</span>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-900">직각삼각형이 될 조건 (피타고라스 정리의 역)</h1>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600">
+                    세 변의 길이 $a, b, c$를 조작하며 <span class="font-bold text-indigo-600">$a^2 + b^2$과 $c^2$의 대소 관계</span>에 따라 삼각형이 어떻게 변하는지 실시간으로 관찰해 보세요.
+                </p>
+            </div>
+
+            <!-- 피타고라스의 수 및 대표 삼각형 프리셋 버튼군 -->
+            <div class="flex flex-wrap items-center gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200 shrink-0">
+                <span class="text-xs font-bold text-slate-500 pl-1 mr-1">피타고라스 수:</span>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-xs" data-a="3" data-b="4" data-c="5">
+                    3 : 4 : 5 ⭐
+                </button>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-indigo-600 border border-slate-200" data-a="5" data-b="12" data-c="13">
+                    5 : 12 : 13 ⭐
+                </button>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-indigo-600 border border-slate-200" data-a="6" data-b="8" data-c="10">
+                    6 : 8 : 10 ⭐
+                </button>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-indigo-600 border border-slate-200" data-a="4" data-b="4" data-c="5">
+                    예각 (4, 4, 5)
+                </button>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-indigo-600 border border-slate-200" data-a="3" data-b="4" data-c="6">
+                    둔각 (3, 4, 6)
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         메인 실험실 대시보드 (2단 반응형 그리드)
+         ====================================================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- ==========================================
+             좌측 7열: 인터랙티브 삼각형 캔버스 (Canvas)
+             ========================================== -->
+        <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-md p-6 flex flex-col justify-between">
+            <div>
+                <!-- 캔버스 헤더: 판별 결과 배지 및 각도 표시 -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Geometry Visualizer</span>
+                        <span id="triangleTypeBadge" class="text-xs font-black px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300">
+                            ⭐ 직각삼각형 (∠C = 90.0°)
+                        </span>
+                    </div>
+
+                    <!-- 정사각형 넓이 보기 토글 -->
+                    <div class="flex items-center gap-3 text-xs text-slate-600">
+                        <label class="inline-flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" id="showSquaresCheck" checked class="rounded text-indigo-600 focus:ring-indigo-500" />
+                            <span>변 위의 정사각형(넓이) 표시</span>
+                        </label>
+                        <label class="inline-flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" id="showAnglesCheck" checked class="rounded text-indigo-600 focus:ring-indigo-500" />
+                            <span>각도 표시</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 캔버스 컨테이너 -->
+                <div class="relative w-full aspect-square sm:aspect-4/3 max-h-[460px] bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden flex items-center justify-center">
+                    <canvas id="triangleCanvas" width="600" height="450" class="w-full h-full block"></canvas>
+
+                    <!-- 직각 표시 안내 오버레이 -->
+                    <div id="canvasOverlayNotice" class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] text-slate-600 font-mono shadow-xs">
+                        가장 긴 변: <strong id="longestSideName" class="text-indigo-600">c (5)</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 하단 변의 길이 및 각도 요약 -->
+            <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center">
+                <div class="bg-rose-50/60 p-2.5 rounded-xl border border-rose-100">
+                    <span class="text-[11px] font-medium text-rose-700 block">변 a (BC)</span>
+                    <span id="summaryA" class="text-base font-black text-rose-900 font-mono">3.0 (a²=9)</span>
+                </div>
+                <div class="bg-blue-50/60 p-2.5 rounded-xl border border-blue-100">
+                    <span class="text-[11px] font-medium text-blue-700 block">변 b (CA)</span>
+                    <span id="summaryB" class="text-base font-black text-blue-900 font-mono">4.0 (b²=16)</span>
+                </div>
+                <div class="bg-purple-50/60 p-2.5 rounded-xl border border-purple-100">
+                    <span class="text-[11px] font-medium text-purple-700 block">변 c (가장 긴 변 AB)</span>
+                    <span id="summaryC" class="text-base font-black text-purple-900 font-mono">5.0 (c²=25)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             우측 5열: 세 변 슬라이더 & 피타고라스 관계 분석 대시보드
+             ========================================== -->
+        <div class="lg:col-span-5 space-y-6">
+
+            <!-- 1. 세 변 조작 슬라이더 패널 -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6">
+                <h3 class="text-sm font-extrabold text-slate-900 mb-4 flex items-center justify-between">
+                    <span>📏 세 변의 길이 조절 컨트롤러</span>
+                    <button id="resetSidesBtn" class="text-xs text-indigo-600 hover:underline">기본값 (3,4,5)</button>
+                </h3>
+
+                <div class="space-y-4">
+                    <!-- 변 a 슬라이더 -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-700">변 <strong class="text-rose-600">a</strong>의 길이:</span>
+                            <span id="displayA" class="text-base font-black text-rose-600 font-mono">3.0</span>
+                        </div>
+                        <input type="range" id="sliderA" min="1" max="15" step="0.5" value="3"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-600" />
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                            <span>1</span>
+                            <span>넓이 a² = <strong id="sqA" class="text-rose-700">9</strong></span>
+                            <span>15</span>
+                        </div>
+                    </div>
+
+                    <!-- 변 b 슬라이더 -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-700">변 <strong class="text-blue-600">b</strong>의 길이:</span>
+                            <span id="displayB" class="text-base font-black text-blue-600 font-mono">4.0</span>
+                        </div>
+                        <input type="range" id="sliderB" min="1" max="15" step="0.5" value="4"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                            <span>1</span>
+                            <span>넓이 b² = <strong id="sqB" class="text-blue-700">16</strong></span>
+                            <span>15</span>
+                        </div>
+                    </div>
+
+                    <!-- 변 c 슬라이더 -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-700">가장 긴 변 <strong class="text-purple-600">c</strong>의 길이:</span>
+                            <span id="displayC" class="text-base font-black text-purple-600 font-mono">5.0</span>
+                        </div>
+                        <input type="range" id="sliderC" min="1" max="20" step="0.5" value="5"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600" />
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                            <span>1</span>
+                            <span>넓이 c² = <strong id="sqC" class="text-purple-700">25</strong></span>
+                            <span>20</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 피타고라스 대소 관계 저울 (a² + b² vs c²) -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                        <span>⚖️ 피타고라스 정리의 역 대소 관계</span>
+                    </h3>
+                </div>
+
+                <!-- 수치 비교 카드 -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 mb-3 space-y-3">
+                    <!-- 수식 결과 -->
+                    <div class="flex items-center justify-between text-center">
+                        <div class="flex-1 bg-white p-2 rounded-xl border border-slate-200">
+                            <span class="text-[11px] text-slate-500 block">a² + b²</span>
+                            <span id="sumSqAB" class="text-lg font-black text-indigo-600 font-mono">25.00</span>
+                        </div>
+                        <div id="comparisonSymbol" class="px-3 text-xl font-black text-emerald-600 font-mono">
+                            =
+                        </div>
+                        <div class="flex-1 bg-white p-2 rounded-xl border border-slate-200">
+                            <span class="text-[11px] text-slate-500 block">c²</span>
+                            <span id="sqCValue" class="text-lg font-black text-purple-600 font-mono">25.00</span>
+                        </div>
+                    </div>
+
+                    <!-- 설명 문구 -->
+                    <p id="conditionExplainText" class="text-xs text-slate-600 leading-relaxed text-center">
+                        <strong class="text-emerald-700 font-bold">$a^2 + b^2 = c^2$</strong> 이므로 이 삼각형은 빗변이 $c$인 <strong class="text-emerald-700">직각삼각형</strong>입니다!
+                    </p>
+                </div>
+
+                <!-- 3가지 삼각형 조건 비교표 -->
+                <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                    <div id="statAcute" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500">
+                        <span>a² + b² &gt; c²</span>
+                        <div class="text-[10px] text-slate-500 font-bold mt-0.5">예각삼각형</div>
+                    </div>
+                    <div id="statRight" class="p-2 rounded-xl bg-emerald-100/70 border border-emerald-300 text-emerald-900 font-black ring-2 ring-emerald-300">
+                        <span>a² + b² = c²</span>
+                        <div class="text-[10px] text-emerald-800 font-bold mt-0.5">⭐ 직각삼각형</div>
+                    </div>
+                    <div id="statObtuse" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500">
+                        <span>a² + b² &lt; c²</span>
+                        <div class="text-[10px] text-slate-500 font-bold mt-0.5">둔각삼각형</div>
+                    </div>
+                </div>
+
+                <!-- 삼각형 불가능 경고 (삼각형의 결정조건 위배 시) -->
+                <div id="triangleImpossibleAlert" class="hidden mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>삼각형이 만들어지지 않습니다! (가장 긴 변 $c$는 반드시 두 변의 합 $a + b$보다 작아야 합니다)</span>
+                </div>
+            </div>
+
+            <!-- 3. 교과서 핵심 정리 노트 -->
+            <div class="bg-indigo-50/70 rounded-3xl border border-indigo-200/80 p-5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-base">💡</span>
+                    <h4 class="text-xs sm:text-sm font-bold text-indigo-900">교과서 핵심 개념 노트</h4>
+                </div>
+                <div class="space-y-2 text-xs text-indigo-950">
+                    <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100">
+                        <span class="font-bold text-indigo-700">피타고라스 정리의 역:</span>
+                        <p class="text-[11px] text-slate-600 mt-0.5">
+                            삼각형의 세 변의 길이 $a, b, c$에 대하여 $a^2 + b^2 = c^2$이 성립하면, 그 삼각형은 빗변의 길이가 $c$인 직각삼각형이다.
+                        </p>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100">
+                        <span class="font-bold text-indigo-700">자주 나오는 피타고라스 수:</span>
+                        <p class="text-[11px] text-slate-600 font-mono mt-0.5">
+                            (3, 4, 5), (5, 12, 13), (6, 8, 10), (8, 15, 17)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ======================================================================
+         하단 푸터 (Footer)
+         ====================================================================== -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span>📐 SciMath Hub</span>
+                <span>• Lesson 02: 직각삼각형이 될 조건 탐구관</span>
+            </div>
+            <div>
+                <span>중학교 2학년 수학 / 고등학교 기하 기초 인터랙티브 모듈</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ======================================================================
+         직각삼각형 인터랙티브 캔버스 렌더러 스크립트
+         ====================================================================== -->
+    <script>
+        /**
+         * 직각삼각형 판별 및 캔버스 렌더러 스크립트
+         * - 세 변 a, b, c에 따른 삼각형 성립 조건 및 각도 계산
+         * - a^2 + b^2 과 c^2 비교 (직각, 예각, 둔각 판정)
+         * - 세 변에 붙은 정사각형(넓이) 시각화
+         */
+
+        const canvas = document.getElementById('triangleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 슬라이더 및 디스플레이 요소
+        const sliderA = document.getElementById('sliderA');
+        const sliderB = document.getElementById('sliderB');
+        const sliderC = document.getElementById('sliderC');
+        const displayA = document.getElementById('displayA');
+        const displayB = document.getElementById('displayB');
+        const displayC = document.getElementById('displayC');
+        const sqA = document.getElementById('sqA');
+        const sqB = document.getElementById('sqB');
+        const sqC = document.getElementById('sqC');
+
+        const summaryA = document.getElementById('summaryA');
+        const summaryB = document.getElementById('summaryB');
+        const summaryC = document.getElementById('summaryC');
+
+        const triangleTypeBadge = document.getElementById('triangleTypeBadge');
+        const longestSideName = document.getElementById('longestSideName');
+        const showSquaresCheck = document.getElementById('showSquaresCheck');
+        const showAnglesCheck = document.getElementById('showAnglesCheck');
+
+        const sumSqAB = document.getElementById('sumSqAB');
+        const sqCValue = document.getElementById('sqCValue');
+        const comparisonSymbol = document.getElementById('comparisonSymbol');
+        const conditionExplainText = document.getElementById('conditionExplainText');
+
+        const statAcute = document.getElementById('statAcute');
+        const statRight = document.getElementById('statRight');
+        const statObtuse = document.getElementById('statObtuse');
+        const triangleImpossibleAlert = document.getElementById('triangleImpossibleAlert');
+
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        const resetSidesBtn = document.getElementById('resetSidesBtn');
+
+        // 메인 렌더링 함수
+        function updateTriangle() {
+            let a = parseFloat(sliderA.value);
+            let b = parseFloat(sliderB.value);
+            let c = parseFloat(sliderC.value);
+
+            // 항상 가장 긴 변이 c가 되도록 정렬(가장 긴 변 기준 판정)
+            // 단, 사용자의 슬라이더 편의를 위해 a, b, c 중 가장 큰 값을 maxSide로 두고 판정
+            const sides = [
+                { name: 'a', val: a },
+                { name: 'b', val: b },
+                { name: 'c', val: c }
+            ].sort((x, y) => x.val - y.val);
+
+            const side1 = sides[0].val; // 가장 짧은 변
+            const side2 = sides[1].val; // 중간 변
+            const maxSide = sides[2].val; // 가장 긴 변
+
+            // 슬라이더 수치 업데이트
+            displayA.textContent = a.toFixed(1);
+            displayB.textContent = b.toFixed(1);
+            displayC.textContent = c.toFixed(1);
+            sqA.textContent = (a * a).toFixed(1);
+            sqB.textContent = (b * b).toFixed(1);
+            sqC.textContent = (c * c).toFixed(1);
+
+            summaryA.textContent = `${a.toFixed(1)} (a²=${(a*a).toFixed(1)})`;
+            summaryB.textContent = `${b.toFixed(1)} (b²=${(b*b).toFixed(1)})`;
+            summaryC.textContent = `${c.toFixed(1)} (c²=${(c*c).toFixed(1)})`;
+
+            // a^2 + b^2 vs c^2 수치 (슬라이더 기준 계산)
+            const sumOfSquares = (side1 * side1) + (side2 * side2);
+            const maxSquare = maxSide * maxSide;
+
+            sumSqAB.textContent = sumOfSquares.toFixed(2);
+            sqCValue.textContent = maxSquare.toFixed(2);
+            longestSideName.textContent = `${sides[2].name} (${maxSide.toFixed(1)})`;
+
+            // 1. 삼각형 성립 조건 검사 (가장 긴 변 < 나머지 두 변의 합)
+            const isPossible = maxSide < (side1 + side2);
+
+            // 스타일 초기화
+            statAcute.className = "p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500";
+            statRight.className = "p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500";
+            statObtuse.className = "p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500";
+
+            if (!isPossible) {
+                triangleImpossibleAlert.classList.remove('hidden');
+                triangleTypeBadge.className = "text-xs font-black px-3 py-1 rounded-full bg-rose-100 text-rose-700 border border-rose-300";
+                triangleTypeBadge.textContent = "❌ 삼각형 형성 불가";
+                comparisonSymbol.textContent = "≠";
+                conditionExplainText.innerHTML = `<span class="text-rose-600 font-bold">가장 긴 변 (${maxSide})이 두 변의 합 (${(side1 + side2).toFixed(1)}) 이상이므로 양 끝이 닿지 않습니다.</span>`;
+
+                // 불가능 상태 캔버스 안내 표시
+                drawImpossible(a, b, c);
+                return;
+            }
+
+            triangleImpossibleAlert.classList.add('hidden');
+
+            // 2. 피타고라스 정리의 역 판정 (부동소수점 오차 감안 0.05 이내면 직각)
+            const diff = Math.abs(sumOfSquares - maxSquare);
+
+            let triangleType = 'acute';
+            if (diff < 0.08) {
+                triangleType = 'right';
+                triangleTypeBadge.className = "text-xs font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 ring-2 ring-emerald-300 animate-pulse";
+                triangleTypeBadge.textContent = "⭐ 직각삼각형 (피타고라스 정리 성립!)";
+                comparisonSymbol.textContent = "=";
+                comparisonSymbol.className = "px-3 text-xl font-black text-emerald-600 font-mono";
+                conditionExplainText.innerHTML = `<strong class="text-emerald-700 font-bold">두 변의 제곱의 합(${sumOfSquares.toFixed(1)}) = 빗변의 제곱(${maxSquare.toFixed(1)})</strong> 이므로 <strong class="text-emerald-700">직각삼각형</strong>입니다!`;
+                statRight.className = "p-2 rounded-xl bg-emerald-100/80 border border-emerald-300 text-emerald-900 font-black ring-2 ring-emerald-300";
+            } else if (sumOfSquares > maxSquare) {
+                triangleType = 'acute';
+                triangleTypeBadge.className = "text-xs font-black px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200";
+                triangleTypeBadge.textContent = "🔷 예각삼각형 (모든 각 < 90°)";
+                comparisonSymbol.textContent = ">";
+                comparisonSymbol.className = "px-3 text-xl font-black text-blue-600 font-mono";
+                conditionExplainText.innerHTML = `<strong class="text-blue-700 font-bold">두 변의 제곱의 합(${sumOfSquares.toFixed(1)}) > 가장 긴 변의 제곱(${maxSquare.toFixed(1)})</strong> 이므로 <strong class="text-blue-700">예각삼각형</strong>입니다.`;
+                statAcute.className = "p-2 rounded-xl bg-blue-100/70 border border-blue-300 text-blue-900 font-bold";
+            } else {
+                triangleType = 'obtuse';
+                triangleTypeBadge.className = "text-xs font-black px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200";
+                triangleTypeBadge.textContent = "🔶 둔각삼각형 (한 각 > 90°)";
+                comparisonSymbol.textContent = "<";
+                comparisonSymbol.className = "px-3 text-xl font-black text-amber-600 font-mono";
+                conditionExplainText.innerHTML = `<strong class="text-amber-700 font-bold">두 변의 제곱의 합(${sumOfSquares.toFixed(1)}) < 가장 긴 변의 제곱(${maxSquare.toFixed(1)})</strong> 이므로 <strong class="text-amber-700">둔각삼각형</strong>입니다.`;
+                statObtuse.className = "p-2 rounded-xl bg-amber-100/70 border border-amber-300 text-amber-900 font-bold";
+            }
+
+            // 캔버스에 삼각형 렌더링
+            drawTriangle(a, b, c, triangleType);
+        }
+
+        // 삼각형 캔버스 그리기 함수
+        function drawTriangle(a, b, c, triangleType) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 점 C(0, 0), 점 B(a, 0), 점 A(b*cosC, b*sinC)
+            // 코사인 법칙: cosC = (a^2 + b^2 - c^2) / (2ab)
+            let cosC = (a * a + b * b - c * c) / (2 * a * b);
+            cosC = Math.max(-1, Math.min(1, cosC)); // 범위 제한
+            const angleCRad = Math.acos(cosC);
+            const angleCDeg = (angleCRad * 180 / Math.PI);
+
+            // 각 A, B 계산
+            const cosA = (b * b + c * c - a * a) / (2 * b * c);
+            const angleADeg = Math.acos(Math.max(-1, Math.min(1, cosA))) * 180 / Math.PI;
+            const angleBDeg = 180 - angleCDeg - angleADeg;
+
+            // 좌표 계산
+            const rawAx = b * cosC;
+            const rawAy = b * Math.sin(angleCRad);
+            const rawBx = a;
+            const rawBy = 0;
+            const rawCx = 0;
+            const rawCy = 0;
+
+            // 바운딩 박스를 기준으로 화면 중앙 정렬 및 스케일 조정
+            const minX = Math.min(rawAx, rawBx, rawCx);
+            const maxX = Math.max(rawAx, rawBx, rawCx);
+            const minY = Math.min(rawAy, rawBy, rawCy);
+            const maxY = Math.max(rawAy, rawBy, rawCy);
+
+            const widthRange = Math.max(0.1, maxX - minX);
+            const heightRange = Math.max(0.1, maxY - minY);
+
+            // 캔버스 여백 고려 스케일
+            const padding = showSquaresCheck.checked ? 100 : 70;
+            const availableW = canvas.width - padding * 2;
+            const availableH = canvas.height - padding * 2;
+            const scale = Math.min(availableW / widthRange, availableH / heightRange, 26);
+
+            const offsetX = canvas.width / 2 - ((minX + maxX) / 2) * scale;
+            const offsetY = canvas.height / 2 + ((minY + maxY) / 2) * scale;
+
+            // 실제 캔버스 좌표
+            const cPt = { x: offsetX + rawCx * scale, y: offsetY - rawCy * scale };
+            const bPt = { x: offsetX + rawBx * scale, y: offsetY - rawBy * scale };
+            const aPt = { x: offsetX + rawAx * scale, y: offsetY - rawAy * scale };
+
+            // 1. 변 위의 정사각형들 그리기 (옵션)
+            if (showSquaresCheck.checked) {
+                // 변 a (BC) 위 정사각형 (아래쪽 방향)
+                drawSideSquare(cPt, bPt, '#fca5a5', 'a²=' + (a*a).toFixed(0));
+                // 변 b (CA) 위 정사각형
+                drawSideSquare(aPt, cPt, '#93c5fd', 'b²=' + (b*b).toFixed(0));
+                // 변 c (AB) 위 정사각형
+                drawSideSquare(bPt, aPt, '#d8b4fe', 'c²=' + (c*c).toFixed(0));
+            }
+
+            // 2. 삼각형 면 채우기 및 외곽선
+            ctx.beginPath();
+            ctx.moveTo(cPt.x, cPt.y);
+            ctx.lineTo(bPt.x, bPt.y);
+            ctx.lineTo(aPt.x, aPt.y);
+            ctx.closePath();
+
+            // 삼각형 종류별 배경색
+            if (triangleType === 'right') {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 3.5;
+            } else if (triangleType === 'acute') {
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 3;
+            } else {
+                ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 3;
+            }
+            ctx.fill();
+            ctx.stroke();
+
+            // 3. 꼭짓점 C의 직각 마크 또는 각도 표시
+            if (triangleType === 'right') {
+                // 직각 사각형 기호 (Square symbol)
+                drawRightAngleSymbol(cPt, bPt, aPt, 16);
+            }
+
+            // 각도 텍스트 표기
+            if (showAnglesCheck.checked) {
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`∠C: ${angleCDeg.toFixed(1)}°`, cPt.x - 20, cPt.y + 16);
+            }
+
+            // 4. 꼭짓점 점(Dot) 및 알파벳 라벨 (A, B, C)
+            drawVertex(cPt, 'C', '#dc2626');
+            drawVertex(bPt, 'B', '#2563eb');
+            drawVertex(aPt, 'A', '#7c3aed');
+
+            // 5. 변 길이 라벨
+            drawEdgeLabel(cPt, bPt, `a = ${a.toFixed(1)}`, '#b91c1c', 16);
+            drawEdgeLabel(cPt, aPt, `b = ${b.toFixed(1)}`, '#1d4ed8', -18);
+            drawEdgeLabel(aPt, bPt, `c = ${c.toFixed(1)}`, '#6d28d9', 18);
+        }
+
+        // 변을 한 변으로 하는 바깥쪽 정사각형 그리기 유틸리티
+        function drawSideSquare(p1, p2, fillColor, label) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+
+            // 수직 벡터 (바깥 방향)
+            const nx = -dy;
+            const ny = dx;
+
+            const p3 = { x: p2.x + nx, y: p2.y + ny };
+            const p4 = { x: p1.x + nx, y: p1.y + ny };
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.lineTo(p4.x, p4.y);
+            ctx.closePath();
+
+            ctx.fillStyle = fillColor;
+            ctx.globalAlpha = 0.35;
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+            ctx.strokeStyle = 'rgba(100, 116, 139, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // 정사각형 중심에 넓이 라벨
+            const centerX = (p1.x + p2.x + p3.x + p4.x) / 4;
+            const centerY = (p1.y + p2.y + p3.y + p4.y) / 4;
+            ctx.fillStyle = '#334155';
+            ctx.font = 'bold 10px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, centerX, centerY);
+        }
+
+        // 직각 기호 표시
+        function drawRightAngleSymbol(c, b, a, size) {
+            const vCB = { x: (b.x - c.x), y: (b.y - c.y) };
+            const lenCB = Math.hypot(vCB.x, vCB.y) || 1;
+            const uCB = { x: (vCB.x / lenCB) * size, y: (vCB.y / lenCB) * size };
+
+            const vCA = { x: (a.x - c.x), y: (a.y - c.y) };
+            const lenCA = Math.hypot(vCA.x, vCA.y) || 1;
+            const uCA = { x: (vCA.x / lenCA) * size, y: (vCA.y / lenCA) * size };
+
+            const p1 = { x: c.x + uCB.x, y: c.y + uCB.y };
+            const p2 = { x: c.x + uCB.x + uCA.x, y: c.y + uCB.y + uCA.y };
+            const p3 = { x: c.x + uCA.x, y: c.y + uCA.y };
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // 꼭짓점 그리기
+        function drawVertex(pt, label, color) {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText(label, pt.x, pt.y - 10);
+        }
+
+        // 변 라벨 그리기
+        function drawEdgeLabel(p1, p2, text, color, offset) {
+            const mx = (p1.x + p2.x) / 2;
+            const my = (p1.y + p2.y) / 2;
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, mx, my + offset);
+        }
+
+        // 삼각형 불가능 안내 그리기
+        function drawImpossible(a, b, c) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 15px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('삼각형을 형성할 수 없습니다', canvas.width / 2, canvas.height / 2 - 10);
+            ctx.font = '12px sans-serif';
+            ctx.fillText(`가장 긴 변(${Math.max(a,b,c)}) < 나머지 두 변의 합 조건을 만족해야 합니다`, canvas.width / 2, canvas.height / 2 + 15);
+        }
+
+        // 슬라이더 이벤트
+        sliderA.addEventListener('input', updateTriangle);
+        sliderB.addEventListener('input', updateTriangle);
+        sliderC.addEventListener('input', updateTriangle);
+
+        showSquaresCheck.addEventListener('change', updateTriangle);
+        showAnglesCheck.addEventListener('change', updateTriangle);
+
+        // 프리셋 버튼
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                presetButtons.forEach(b => {
+                    b.classList.remove('bg-indigo-600', 'text-white');
+                    b.classList.add('bg-white', 'text-slate-600');
+                });
+                btn.classList.remove('bg-white', 'text-slate-600');
+                btn.classList.add('bg-indigo-600', 'text-white');
+
+                sliderA.value = btn.getAttribute('data-a');
+                sliderB.value = btn.getAttribute('data-b');
+                sliderC.value = btn.getAttribute('data-c');
+                updateTriangle();
+            });
+        });
+
+        // 초기화
+        resetSidesBtn.addEventListener('click', () => {
+            sliderA.value = 3;
+            sliderB.value = 4;
+            sliderC.value = 5;
+            updateTriangle();
+        });
+
+        // 리사이즈
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            updateTriangle();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('DOMContentLoaded', () => {
+            resizeCanvas();
+        });
+    </script>
+</body>
+</html>

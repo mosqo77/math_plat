@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이차함수와 그래프 탐구관 | SciMath Hub</title>
+    <meta name="description" content="고등학교 1학년 공통수학 이차함수의 그래프, 꼭짓점, 축의 방정식, 판별식과 x축의 위치 관계 인터랙티브 시뮬레이션">
+
+    <!-- 테일윈드 CSS (Tailwind CSS CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 프리텐다드 웹 폰트 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* 캔버스 좌표평면 부드러운 테두리 및 그림자 */
+        #graphCanvas {
+            background-color: #ffffff;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ======================================================================
+         공통 상단 내비게이션 바 (SciMath Hub 공통 헤더)
+         ====================================================================== -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- 좌측: 로고 및 로비(index.html) 복귀 버튼 -->
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg p-1" title="메인 로비(전체 탐구 목록)로 이동">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+                        <span class="text-base">📐</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 group-hover:text-brand-600 transition-colors">SciMath Hub</span>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-100">수학·과학</span>
+                        </div>
+                    </div>
+                </a>
+
+                <span class="text-slate-300 hidden sm:inline">|</span>
+
+                <!-- 전체 탐구 목록 버튼 -->
+                <a href="index.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors">
+                    <span>←</span>
+                    <span class="hidden sm:inline">전체 탐구 목록</span>
+                    <span class="sm:hidden">목록</span>
+                </a>
+            </div>
+
+            <!-- 중앙: 현재 탐구 표시 배지 -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span>Math 01 : 이차함수와 그래프 탐구관</span>
+            </div>
+
+            <!-- 우측: 빠른 이동 버튼 (다음 탐구: 직각삼각형이 될 조건) -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="right-triangle.html" 
+                   class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-md shadow-indigo-200 transition-all hover:translate-x-0.5">
+                    <span>다음 (직각삼각형)</span>
+                    <span class="text-base">→</span>
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ======================================================================
+         상단 수업 안내 배너 (Lesson Intro)
+         ====================================================================== -->
+    <section class="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-5">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-100 text-indigo-700">고1 공통수학 1</span>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-900">이차함수와 그래프의 성질 인터랙티브 탐구</h1>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600">
+                    계수 $a, b, c$를 조작하며 <span class="font-bold text-indigo-600">포물선의 개형, 꼭짓점의 이동, 대칭축, 판별식 $D$와 $x$축의 위치 관계</span>를 실시간으로 관찰해 보세요.
+                </p>
+            </div>
+
+            <!-- 추천 프리셋(미리 설정된 값) 빠른 선택 버튼군 -->
+            <div class="flex flex-wrap items-center gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200 shrink-0">
+                <span class="text-xs font-bold text-slate-500 pl-1 mr-1">개념 프리셋:</span>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-xs" data-preset="standard">
+                    기본 ($y=x^2-2x-3$)
+                </button>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-indigo-600 border border-slate-200" data-preset="tangent">
+                    접함 ($D=0$)
+                </button>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-indigo-600 border border-slate-200" data-preset="floating">
+                    떠있음 ($D&lt;0$)
+                </button>
+                <button class="preset-btn px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-indigo-600 border border-slate-200" data-preset="inverted">
+                    위로 볼록 ($a&lt;0$)
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         메인 수학 실험실 대시보드 (2단 반응형 그리드)
+         ====================================================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- ==========================================
+             좌측 7열: 인터랙티브 함수 그래프 캔버스 (Canvas)
+             ========================================== -->
+        <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-md p-6 flex flex-col justify-between">
+            <div>
+                <!-- 캔버스 헤더: 현재 수식 및 범례 -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Function Plotter</span>
+                        <span id="functionFormulaText" class="text-base sm:text-lg font-black text-indigo-600 font-mono">
+                            y = 1.0x² - 2.0x - 3.0
+                        </span>
+                    </div>
+
+                    <!-- 표시 옵션 체크박스들 -->
+                    <div class="flex items-center gap-3 text-xs text-slate-600">
+                        <label class="inline-flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" id="showVertexCheck" checked class="rounded text-indigo-600 focus:ring-indigo-500" />
+                            <span>꼭짓점</span>
+                        </label>
+                        <label class="inline-flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" id="showAxisCheck" checked class="rounded text-indigo-600 focus:ring-indigo-500" />
+                            <span>대칭축</span>
+                        </label>
+                        <label class="inline-flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" id="showRootsCheck" checked class="rounded text-indigo-600 focus:ring-indigo-500" />
+                            <span>x절편(실근)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 캔버스 컨테이너 (반응형 1:1 또는 4:3 비율) -->
+                <div class="relative w-full aspect-square sm:aspect-4/3 max-h-[460px] bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden flex items-center justify-center">
+                    <canvas id="graphCanvas" width="600" height="450" class="w-full h-full block"></canvas>
+
+                    <!-- 그래프 안내 오버레이 배지 -->
+                    <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] text-slate-500 font-mono shadow-xs">
+                        좌표 격자: 1칸 = 1 단위
+                    </div>
+                </div>
+            </div>
+
+            <!-- 하단 수식 분석 요약 카드 -->
+            <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center">
+                <div class="bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-100">
+                    <span class="text-[11px] font-medium text-indigo-700 block">꼭짓점 (Vertex)</span>
+                    <span id="vertexSummary" class="text-sm font-black text-indigo-900 font-mono">(1.0, -4.0)</span>
+                </div>
+                <div class="bg-purple-50/60 p-2.5 rounded-xl border border-purple-100">
+                    <span class="text-[11px] font-medium text-purple-700 block">축의 방정식 (Axis)</span>
+                    <span id="axisSummary" class="text-sm font-black text-purple-900 font-mono">x = 1.0</span>
+                </div>
+                <div class="bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100">
+                    <span class="text-[11px] font-medium text-emerald-700 block">x축과의 교점 (Roots)</span>
+                    <span id="rootsSummary" class="text-sm font-black text-emerald-900 font-mono">(-1.0, 3.0)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             우측 5열: 계수 조작 슬라이더 & 판별식 대시보드
+             ========================================== -->
+        <div class="lg:col-span-5 space-y-6">
+
+            <!-- 1. 계수 슬라이더 조작 패널 -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6">
+                <h3 class="text-sm font-extrabold text-slate-900 mb-4 flex items-center justify-between">
+                    <span>🎛️ 계수 조작 컨트롤러 ($y = ax^2 + bx + c$)</span>
+                    <button id="resetSlidersBtn" class="text-xs text-indigo-600 hover:underline">기본값 복원</button>
+                </h3>
+
+                <div class="space-y-4">
+                    <!-- 계수 a 슬라이더 -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-700">이차항 계수 <strong class="text-indigo-600">a</strong> (모양과 폭, 볼록 방향):</span>
+                            <span id="valueA" class="text-base font-black text-indigo-600 font-mono">1.0</span>
+                        </div>
+                        <input type="range" id="sliderA" min="-4" max="4" step="0.2" value="1.0"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                            <span>-4 (위로 볼록)</span>
+                            <span class="text-slate-500">0 (직선 제외)</span>
+                            <span>+4 (아래로 볼록)</span>
+                        </div>
+                    </div>
+
+                    <!-- 계수 b 슬라이더 -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-700">일차항 계수 <strong class="text-purple-600">b</strong> (축의 좌우 이동):</span>
+                            <span id="valueB" class="text-base font-black text-purple-600 font-mono">-2.0</span>
+                        </div>
+                        <input type="range" id="sliderB" min="-6" max="6" step="0.5" value="-2.0"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600" />
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                            <span>-6 (축 오른쪽)</span>
+                            <span class="text-slate-500">0 (축이 y축)</span>
+                            <span>+6 (축 왼쪽)</span>
+                        </div>
+                    </div>
+
+                    <!-- 계수 c 슬라이더 -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-700">상수항 <strong class="text-emerald-600">c</strong> (y절편, 상하 평행이동):</span>
+                            <span id="valueC" class="text-base font-black text-emerald-600 font-mono">-3.0</span>
+                        </div>
+                        <input type="range" id="sliderC" min="-8" max="8" step="0.5" value="-3.0"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600" />
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
+                            <span>-8 (아래로 이동)</span>
+                            <span class="text-slate-500">0 (원점 지남)</span>
+                            <span>+8 (위로 이동)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 판별식(D)과 위치 관계 대시보드 -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                        <span>🔍 판별식 $D = b^2 - 4ac$ 분석</span>
+                    </h3>
+                    <span id="discriminantBadge" class="text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        D &gt; 0 (서로 다른 두 실근)
+                    </span>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 mb-3">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs text-slate-600">판별식 계산값:</span>
+                        <span id="discriminantValue" class="text-xl font-black text-slate-900 font-mono">D = 16.00</span>
+                    </div>
+                    <p id="discriminantExplain" class="text-xs text-slate-600 leading-relaxed">
+                        판별식 $D &gt; 0$이므로 포물선이 $x$축과 <strong class="text-emerald-700">서로 다른 두 점에서 만납니다.</strong>
+                    </p>
+                </div>
+
+                <!-- 3가지 판별식 상태 비교표 -->
+                <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                    <div id="statDPositive" class="p-2 rounded-xl bg-emerald-100/70 border border-emerald-300 text-emerald-900 font-semibold">
+                        <span>D &gt; 0</span>
+                        <div class="text-[10px] text-emerald-700 font-normal mt-0.5">두 교점</div>
+                    </div>
+                    <div id="statDZero" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500">
+                        <span>D = 0</span>
+                        <div class="text-[10px] text-slate-400 font-normal mt-0.5">한 점 접함</div>
+                    </div>
+                    <div id="statDNegative" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500">
+                        <span>D &lt; 0</span>
+                        <div class="text-[10px] text-slate-400 font-normal mt-0.5">만나지 않음</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 고1 공통수학 핵심 개념 정리 카드 -->
+            <div class="bg-indigo-50/70 rounded-3xl border border-indigo-200/80 p-5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-base">💡</span>
+                    <h4 class="text-xs sm:text-sm font-bold text-indigo-900">고1 수학 탐구 팁</h4>
+                </div>
+                <div class="space-y-2 text-xs text-indigo-950">
+                    <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100">
+                        <span class="font-bold text-indigo-700">표준형 변형:</span>
+                        <code class="font-bold text-indigo-900 block mt-0.5">y = a(x - p)² + q</code>
+                        <span class="text-[11px] text-slate-500">꼭짓점 $(p, q) = (-b/2a, -D/4a)$, 축 $x = -b/2a$</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100">
+                        <span class="font-bold text-indigo-700">이차방정식과의 관계:</span>
+                        <span class="text-[11px] text-slate-600 block mt-0.5">
+                            $ax^2 + bx + c = 0$의 실근의 개수는 이차함수 그래프와 $x$축의 교점의 개수와 정확히 일치합니다.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ======================================================================
+         하단 푸터 (Footer)
+         ====================================================================== -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span>📐 SciMath Hub</span>
+                <span>• Lesson 01: 이차함수와 그래프 탐구관</span>
+            </div>
+            <div>
+                <span>고등학교 1학년 공통수학 1 인터랙티브 모듈</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ======================================================================
+         이차함수 인터랙티브 캔버스 렌더러 스크립트
+         ====================================================================== -->
+    <script>
+        /**
+         * 이차함수 캔버스 렌더러 스크립트
+         * - 수식: y = ax^2 + bx + c
+         * - 꼭짓점 (p, q), 축 x = p, x절편, y절편 실시간 계산
+         * - 좌표평면 및 눈금, 포물선 곡선 실시간 렌더링
+         */
+
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 슬라이더 및 수치 표시 요소
+        const sliderA = document.getElementById('sliderA');
+        const sliderB = document.getElementById('sliderB');
+        const sliderC = document.getElementById('sliderC');
+        const valueA = document.getElementById('valueA');
+        const valueB = document.getElementById('valueB');
+        const valueC = document.getElementById('valueC');
+
+        const functionFormulaText = document.getElementById('functionFormulaText');
+        const vertexSummary = document.getElementById('vertexSummary');
+        const axisSummary = document.getElementById('axisSummary');
+        const rootsSummary = document.getElementById('rootsSummary');
+
+        const discriminantValue = document.getElementById('discriminantValue');
+        const discriminantBadge = document.getElementById('discriminantBadge');
+        const discriminantExplain = document.getElementById('discriminantExplain');
+        const statDPositive = document.getElementById('statDPositive');
+        const statDZero = document.getElementById('statDZero');
+        const statDNegative = document.getElementById('statDNegative');
+
+        const showVertexCheck = document.getElementById('showVertexCheck');
+        const showAxisCheck = document.getElementById('showAxisCheck');
+        const showRootsCheck = document.getElementById('showRootsCheck');
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        const resetSlidersBtn = document.getElementById('resetSlidersBtn');
+
+        // 좌표계 설정 파라미터 (좌표평면 스케일)
+        const scale = 30; // 1단위당 픽셀 수 (30px = 1단위)
+        let originX = canvas.width / 2;
+        let originY = canvas.height / 2;
+
+        // 수학 좌표를 캔버스 픽셀 좌표로 변환 (Math -> Canvas)
+        function toCanvasX(x) {
+            return originX + x * scale;
+        }
+        function toCanvasY(y) {
+            return originY - y * scale;
+        }
+
+        // 그래프 렌더링 메인 함수
+        function drawGraph() {
+            let a = parseFloat(sliderA.value);
+            let b = parseFloat(sliderB.value);
+            let c = parseFloat(sliderC.value);
+
+            // a가 0이면 이차함수가 아니므로 미세 조정 (0.01)
+            if (Math.abs(a) < 0.05) {
+                a = a >= 0 ? 0.1 : -0.1;
+            }
+
+            // 슬라이더 수치 텍스트 업데이트
+            valueA.textContent = a.toFixed(1);
+            valueB.textContent = b.toFixed(1);
+            valueC.textContent = c.toFixed(1);
+
+            // 수식 문자열 포맷팅
+            const signB = b >= 0 ? `+ ${b.toFixed(1)}x` : `- ${Math.abs(b).toFixed(1)}x`;
+            const signC = c >= 0 ? `+ ${c.toFixed(1)}` : `- ${Math.abs(c).toFixed(1)}`;
+            functionFormulaText.textContent = `y = ${a.toFixed(1)}x² ${signB} ${signC}`;
+
+            // 꼭짓점 좌표 (p, q) 계산: p = -b / (2a), q = c - (b^2 / 4a)
+            const p = -b / (2 * a);
+            const q = c - (b * b) / (4 * a);
+            vertexSummary.textContent = `(${p.toFixed(2)}, ${q.toFixed(2)})`;
+            axisSummary.textContent = `x = ${p.toFixed(2)}`;
+
+            // 판별식 D = b^2 - 4ac
+            const D = (b * b) - (4 * a * c);
+            discriminantValue.textContent = `D = ${D.toFixed(2)}`;
+
+            // 판별식 상태 판정
+            statDPositive.className = "p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500";
+            statDZero.className = "p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500";
+            statDNegative.className = "p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-500";
+
+            if (D > 0.01) {
+                discriminantBadge.className = "text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200";
+                discriminantBadge.textContent = "D > 0 (서로 다른 두 실근)";
+                discriminantExplain.innerHTML = `판별식 $D > 0$이므로 포물선이 $x$축과 <strong class="text-emerald-700">서로 다른 두 점에서 만납니다.</strong>`;
+                statDPositive.className = "p-2 rounded-xl bg-emerald-100/70 border border-emerald-300 text-emerald-900 font-semibold";
+
+                const root1 = (-b - Math.sqrt(D)) / (2 * a);
+                const root2 = (-b + Math.sqrt(D)) / (2 * a);
+                rootsSummary.textContent = `(${Math.min(root1, root2).toFixed(2)}, ${Math.max(root1, root2).toFixed(2)})`;
+            } else if (Math.abs(D) <= 0.01) {
+                discriminantBadge.className = "text-xs font-extrabold px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200";
+                discriminantBadge.textContent = "D = 0 (한 점에서 접함, 중근)";
+                discriminantExplain.innerHTML = `판별식 $D = 0$이므로 포물선의 꼭짓점이 $x$축 위에 놓이며 <strong class="text-blue-700">한 점에서 접합니다.</strong>`;
+                statDZero.className = "p-2 rounded-xl bg-blue-100/70 border border-blue-300 text-blue-900 font-semibold";
+                rootsSummary.textContent = `x = ${p.toFixed(2)} (중근)`;
+            } else {
+                discriminantBadge.className = "text-xs font-extrabold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200";
+                discriminantBadge.textContent = "D < 0 (만나지 않음, 허근)";
+                discriminantExplain.innerHTML = `판별식 $D < 0$이므로 포물선이 $x$축과 <strong class="text-rose-700">만나지 않고 떠 있거나 가라앉아 있습니다.</strong>`;
+                statDNegative.className = "p-2 rounded-xl bg-rose-100/70 border border-rose-300 text-rose-900 font-semibold";
+                rootsSummary.textContent = "실근 없음 (교점 0개)";
+            }
+
+            // 캔버스 초기화
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. 격자선 (Grid lines) 그리기
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+
+            // 세로 격자선
+            for (let x = originX % scale; x < canvas.width; x += scale) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            // 가로 격자선
+            for (let y = originY % scale; y < canvas.height; y += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // 2. 좌표축 (X축, Y축) 그리기
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+
+            // X축
+            ctx.beginPath();
+            ctx.moveTo(0, originY);
+            ctx.lineTo(canvas.width, originY);
+            ctx.stroke();
+
+            // Y축
+            ctx.beginPath();
+            ctx.moveTo(originX, 0);
+            ctx.lineTo(originX, canvas.height);
+            ctx.stroke();
+
+            // 눈금 텍스트
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            // X축 숫자 표기 (-8 ~ 8)
+            for (let i = -8; i <= 8; i += 2) {
+                if (i !== 0) {
+                    ctx.fillText(i.toString(), toCanvasX(i), originY + 4);
+                }
+            }
+            // Y축 숫자 표기 (-6 ~ 6)
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let j = -6; j <= 6; j += 2) {
+                if (j !== 0) {
+                    ctx.fillText(j.toString(), originX - 6, toCanvasY(j));
+                }
+            }
+            // 원점 표기 O
+            ctx.fillText('O', originX - 5, originY + 12);
+
+            // 3. 대칭축 (Axis of Symmetry) 그리기
+            if (showAxisCheck.checked) {
+                const axisCanvasX = toCanvasX(p);
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(147, 51, 234, 0.6)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(axisCanvasX, 0);
+                ctx.lineTo(axisCanvasX, canvas.height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 4. 포물선 곡선 (Parabola) 그리기
+            ctx.beginPath();
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 3;
+
+            let isFirst = true;
+            for (let px = 0; px <= canvas.width; px += 2) {
+                const mathX = (px - originX) / scale;
+                const mathY = a * (mathX * mathX) + b * mathX + c;
+                const py = toCanvasY(mathY);
+
+                if (isFirst) {
+                    ctx.moveTo(px, py);
+                    isFirst = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+
+            // 5. 꼭짓점 (Vertex) 점 그리기
+            if (showVertexCheck.checked) {
+                const vx = toCanvasX(p);
+                const vy = toCanvasY(q);
+
+                ctx.beginPath();
+                ctx.arc(vx, vy, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#6366f1';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                // 꼭짓점 좌표 라벨
+                ctx.fillStyle = '#312e81';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`꼭짓점 (${p.toFixed(1)}, ${q.toFixed(1)})`, vx, vy - 12);
+            }
+
+            // 6. x절편 (Roots) 교점 그리기
+            if (showRootsCheck.checked && D >= 0) {
+                const root1 = (-b - Math.sqrt(Math.max(0, D))) / (2 * a);
+                const root2 = (-b + Math.sqrt(Math.max(0, D))) / (2 * a);
+
+                [root1, root2].forEach((root, idx) => {
+                    const rx = toCanvasX(root);
+                    const ry = toCanvasY(0);
+
+                    ctx.beginPath();
+                    ctx.arc(rx, ry, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#10b981';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+                });
+            }
+        }
+
+        // 슬라이더 이벤트 연결
+        sliderA.addEventListener('input', drawGraph);
+        sliderB.addEventListener('input', drawGraph);
+        sliderC.addEventListener('input', drawGraph);
+
+        showVertexCheck.addEventListener('change', drawGraph);
+        showAxisCheck.addEventListener('change', drawGraph);
+        showRootsCheck.addEventListener('change', drawGraph);
+
+        // 프리셋 버튼 이벤트
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                presetButtons.forEach(b => {
+                    b.classList.remove('bg-indigo-600', 'text-white');
+                    b.classList.add('bg-white', 'text-slate-600');
+                });
+                btn.classList.remove('bg-white', 'text-slate-600');
+                btn.classList.add('bg-indigo-600', 'text-white');
+
+                const preset = btn.getAttribute('data-preset');
+                if (preset === 'standard') {
+                    sliderA.value = 1.0; sliderB.value = -2.0; sliderC.value = -3.0;
+                } else if (preset === 'tangent') {
+                    sliderA.value = 1.0; sliderB.value = -4.0; sliderC.value = 4.0;
+                } else if (preset === 'floating') {
+                    sliderA.value = 1.0; sliderB.value = 2.0; sliderC.value = 3.0;
+                } else if (preset === 'inverted') {
+                    sliderA.value = -1.0; sliderB.value = 2.0; sliderC.value = 2.0;
+                }
+                drawGraph();
+            });
+        });
+
+        // 초기화 버튼
+        resetSlidersBtn.addEventListener('click', () => {
+            sliderA.value = 1.0; sliderB.value = -2.0; sliderC.value = -3.0;
+            drawGraph();
+        });
+
+        // 반응형 캔버스 크기 조정
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            originX = canvas.width / 2;
+            originY = canvas.height / 2;
+            drawGraph();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // 초기 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            resizeCanvas();
+        });
+    </script>
+</body>
+</html>

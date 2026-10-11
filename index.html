@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciMath Hub | 수학·과학 탐구 플랫폼</title>
+    <meta name="description" content="고등학교 수학과 과학 교과를 위한 인터랙티브 시뮬레이션 및 디지털 탐구 실험실 허브">
+    
+    <!-- 테일윈드 CSS (Tailwind CSS CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // 테일윈드 맞춤 색상 및 테마 설정
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 프리텐다드 웹 폰트 (Pretendard Font) -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <style>
+        /* 부드러운 스크롤 및 글꼴 렌더링 설정 */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Pretendard', sans-serif;
+        }
+        /* 카드 호버 시 부드러운 위로 떠오름 효과 */
+        .lesson-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .lesson-card:hover {
+            transform: translateY(-6px);
+        }
+        /* 은은한 배경 그라데이션 패턴 */
+        .hero-pattern {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1.2px, transparent 1.2px), radial-gradient(#e2e8f0 1.2px, #f8fafc 1.2px);
+            background-size: 48px 48px;
+            background-position: 0 0, 24px 24px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
+
+    <!-- ======================================================================
+         상단 내비게이션 바 (Global Header)
+         ====================================================================== -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- 플랫폼 로고 및 이름 -->
+            <a href="index.html" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg p-1">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+                    <span class="text-xl">📐</span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 group-hover:text-brand-600 transition-colors">SciMath Hub</span>
+                        <span class="text-[11px] font-semibold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">수학·과학 v2.0</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 hidden sm:block">수학 & 과학 인터랙티브 탐구 포털</p>
+                </div>
+            </a>
+
+            <!-- 헤더 우측 메뉴: 구글 시트 링크 & 상태 -->
+            <div class="flex items-center gap-3">
+                <a href="https://docs.google.com/spreadsheets/d/11g3-4G8SFfdClTHafM9EGkMebrsdnCx5GrTk0vulFNA/edit?usp=sharing" target="_blank" rel="noopener noreferrer" 
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors shadow-xs"
+                   title="연동된 구글 스프레드시트 열기">
+                    <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                    <span class="hidden md:inline">구글 시트 연동</span>
+                    <span class="md:hidden">시트</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </a>
+
+                <button id="refreshSheetBtn" type="button" 
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-lg transition-colors">
+                    <span id="syncIcon" class="inline-block transition-transform duration-500">🔄</span>
+                    <span class="hidden sm:inline">데이터 새로고침</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ======================================================================
+         메인 히어로 영역 (Hero Section)
+         ====================================================================== -->
+    <section class="hero-pattern border-b border-slate-200 py-12 sm:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <!-- 안내 배지 -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs sm:text-sm font-semibold mb-4 shadow-xs">
+                <span>📐 수학 시각화 & 🧪 과학 실험실</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                <span>태블릿 & PC 반응형 인터랙션</span>
+            </div>
+
+            <!-- 메인 타이틀 & 소개 문구 -->
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+                수학과 과학의 원리를 직접 조작하는<br class="hidden sm:inline">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600">수학·과학 탐구 플랫폼</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-base sm:text-lg text-slate-600 mb-8 leading-relaxed">
+                복잡한 수식과 추상적인 과학 개념을 눈으로 보고 손으로 조작해 보세요.<br class="hidden sm:inline">
+                이차함수 그래프, 원소 주기율표, 산-염기 중화반응을 독립된 인터랙티브 실험실에서 탐구할 수 있습니다.
+            </p>
+
+            <!-- 검색 및 컨트롤 바 -->
+            <div class="max-w-xl mx-auto mb-8">
+                <div class="relative flex items-center shadow-md rounded-2xl bg-white border border-slate-300 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100 transition-all">
+                    <span class="pl-4 text-slate-400 text-lg">🔍</span>
+                    <input type="text" id="searchInput" 
+                           placeholder="수업 제목, 수학 공식, 과학 개념 검색 (예: 이차함수, 판별식, 원소, 산-염기)" 
+                           class="w-full py-3.5 pl-3 pr-4 text-sm sm:text-base text-slate-800 placeholder-slate-400 bg-transparent border-0 focus:outline-none rounded-2xl" />
+                    <button id="clearSearchBtn" type="button" class="pr-4 text-slate-400 hover:text-slate-600 text-sm hidden">✕</button>
+                </div>
+            </div>
+
+            <!-- 교과목 및 단원별 필터 버튼 그룹 -->
+            <div class="flex flex-wrap items-center justify-center gap-2" id="filterContainer">
+                <button class="filter-btn active px-4 py-2 text-xs sm:text-sm font-semibold rounded-full bg-slate-900 text-white shadow-sm transition-all hover:bg-slate-800" data-filter="all">
+                    전체 탐구 (<span id="totalCount">6</span>)
+                </button>
+                <button class="filter-btn px-4 py-2 text-xs sm:text-sm font-semibold rounded-full bg-white text-slate-600 border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 shadow-xs transition-all" data-filter="math">
+                    📐 수학 탐구
+                </button>
+                <button class="filter-btn px-4 py-2 text-xs sm:text-sm font-semibold rounded-full bg-white text-slate-600 border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 shadow-xs transition-all" data-filter="science">
+                    🧪 과학 탐구
+                </button>
+                <button class="filter-btn px-4 py-2 text-xs sm:text-sm font-semibold rounded-full bg-white text-slate-600 border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 shadow-xs transition-all" data-filter="ready">
+                    준비중 탐구
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         본문: 수업 카드 목록 그리드 (Lessons Grid)
+         ====================================================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        
+        <!-- 섹션 헤더 -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <span>📚 수학·과학 탐구 모듈</span>
+                    <span id="resultCountBadge" class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-100">
+                        총 6개 개설됨
+                    </span>
+                </h2>
+                <p class="text-sm text-slate-500 mt-1">참여하고자 하는 탐구 카드를 선택하여 인터랙티브 학습을 시작하세요.</p>
+            </div>
+
+            <!-- 스프레드시트 상태 알림 토스트 -->
+            <div id="syncStatusBox" class="inline-flex items-center gap-2 text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span id="syncStatusText">스프레드시트 데이터 연동 완료</span>
+            </div>
+        </div>
+
+        <!-- 카드 그리드 컨테이너 -->
+        <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
+            <!-- ==========================================
+                 카드 1 [수학 01]: 이차함수와 그래프 탐구관 (function-graph.html)
+                 ========================================== -->
+            <article class="lesson-card bg-white rounded-2xl border border-slate-200/90 shadow-md hover:shadow-xl hover:border-indigo-300 overflow-hidden flex flex-col justify-between" data-category="math">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            Math 01
+                        </span>
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            탐구 가능
+                        </span>
+                    </div>
+
+                    <div class="flex items-start gap-4 mb-3">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-3xl shadow-inner shrink-0 group-hover:scale-105 transition-transform">
+                            📐
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                이차함수와 그래프 탐구관
+                            </h3>
+                            <p class="text-xs font-medium text-indigo-600 mt-0.5">고1 공통수학 1 · 방정식과 함수</p>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4">
+                        계수 $a, b, c$ 슬라이더를 조작하여 포물선의 개형, 꼭짓점과 대칭축의 이동, 판별식 $D$에 따른 $x$축과의 위치 관계를 캔버스 위에서 실시간으로 시각화합니다.
+                    </p>
+
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <span class="text-xs font-medium bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg">#이차함수</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#포물선과꼭짓점</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#판별식D</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#x축위치관계</span>
+                    </div>
+                </div>
+
+                <div class="p-6 pt-0 border-t border-slate-100 mt-auto bg-slate-50/50">
+                    <div class="pt-4 flex flex-col sm:flex-row items-center gap-2">
+                        <a href="function-graph.html" 
+                           class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-200 transition-all focus:ring-2 focus:ring-indigo-500">
+                            <span>수학 탐구 시작하기</span>
+                            <span class="text-base">→</span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ==========================================
+                 카드 2 [수학 02]: 직각삼각형이 될 조건 탐구관 (right-triangle.html)
+                 ========================================== -->
+            <article class="lesson-card bg-white rounded-2xl border border-slate-200/90 shadow-md hover:shadow-xl hover:border-purple-300 overflow-hidden flex flex-col justify-between" data-category="math">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase bg-purple-50 text-purple-700 border border-purple-100">
+                            Math 02
+                        </span>
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            탐구 가능
+                        </span>
+                    </div>
+
+                    <div class="flex items-start gap-4 mb-3">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-3xl shadow-inner shrink-0 group-hover:scale-105 transition-transform">
+                            🔺
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
+                                직각삼각형이 될 조건 탐구관
+                            </h3>
+                            <p class="text-xs font-medium text-purple-600 mt-0.5">중2 / 고1 기하 · 피타고라스 정리의 역</p>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4">
+                        세 변의 길이 $a, b, c$를 조작하며 $a^2 + b^2$과 $c^2$의 대소 관계에 따른 직각·예각·둔각삼각형 판정 및 변 위의 정사각형 넓이를 시각적으로 탐구합니다.
+                    </p>
+
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <span class="text-xs font-medium bg-purple-50 text-purple-700 px-2.5 py-1 rounded-lg">#직각삼각형조건</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#피타고라스정리의역</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#피타고라스의수</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#정사각형넓이</span>
+                    </div>
+                </div>
+
+                <div class="p-6 pt-0 border-t border-slate-100 mt-auto bg-slate-50/50">
+                    <div class="pt-4 flex flex-col sm:flex-row items-center gap-2">
+                        <a href="right-triangle.html" 
+                           class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm shadow-md shadow-purple-200 transition-all focus:ring-2 focus:ring-purple-500">
+                            <span>기하 탐구 시작하기</span>
+                            <span class="text-base">→</span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ==========================================
+                 카드 2 [과학]: 원소 주기율표 탐구관 (periodic-table.html)
+                 ========================================== -->
+            <article class="lesson-card bg-white rounded-2xl border border-slate-200/90 shadow-md hover:shadow-xl hover:border-blue-300 overflow-hidden flex flex-col justify-between" data-category="science">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase bg-blue-50 text-blue-700 border border-blue-100">
+                            Science 01
+                        </span>
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            탐구 가능
+                        </span>
+                    </div>
+
+                    <div class="flex items-start gap-4 mb-3">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-3xl shadow-inner shrink-0 group-hover:scale-105 transition-transform">
+                            ⚛️
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                                원소 주기율표 탐구관
+                            </h3>
+                            <p class="text-xs font-medium text-blue-600 mt-0.5">고1 통합과학 · 물질의 규칙성과 결합</p>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4">
+                        1번 수소부터 118번 오가네손까지, 원소의 주기성과 보어 원자 모형(전자 껍질 회전 애니메이션) 및 원자가 전자를 생생하게 탐구합니다.
+                    </p>
+
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <span class="text-xs font-medium bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">#원소의주기성</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#보어원자모형</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#원자가전자</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#고1필수20원소</span>
+                    </div>
+                </div>
+
+                <div class="p-6 pt-0 border-t border-slate-100 mt-auto bg-slate-50/50">
+                    <div class="pt-4 flex flex-col sm:flex-row items-center gap-2">
+                        <a href="periodic-table.html" 
+                           class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md shadow-blue-200 transition-all focus:ring-2 focus:ring-blue-500">
+                            <span>과학 탐구 시작하기</span>
+                            <span class="text-base">→</span>
+                        </a>
+                        <a href="https://imuzikr.github.io/test01/" target="_blank" rel="noopener noreferrer" 
+                           class="w-full sm:w-auto inline-flex items-center justify-center px-3 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200 transition-colors"
+                           title="스프레드시트에 등록된 외부 원본 페이지 열기">
+                            <span>외부링크</span>
+                            <svg class="w-3.5 h-3.5 ml-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ==========================================
+                 카드 3 [과학]: 산-염기 중화반응 (neutralization.html)
+                 ========================================== -->
+            <article class="lesson-card bg-white rounded-2xl border border-slate-200/90 shadow-md hover:shadow-xl hover:border-emerald-300 overflow-hidden flex flex-col justify-between" data-category="science">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            Science 02
+                        </span>
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            탐구 가능
+                        </span>
+                    </div>
+
+                    <div class="flex items-start gap-4 mb-3">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-3xl shadow-inner shrink-0 group-hover:scale-105 transition-transform">
+                            🧪
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">
+                                산-염기 중화반응 탐구관
+                            </h3>
+                            <p class="text-xs font-medium text-emerald-600 mt-0.5">화학 I / 통합과학 · 역동적인 화학 반응</p>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4">
+                        묽은 염산(HCl)과 수산화 나트륨(NaOH)의 적정 시뮬레이션! 지시약 색상 변화, 이온 수의 변화 그래프, 중화열에 따른 온도 변화를 관찰합니다.
+                    </p>
+
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <span class="text-xs font-medium bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg">#중화반응</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#BTB지시약</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#알짜이온반응식</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">#중화열</span>
+                    </div>
+                </div>
+
+                <div class="p-6 pt-0 border-t border-slate-100 mt-auto bg-slate-50/50">
+                    <div class="pt-4 flex flex-col sm:flex-row items-center gap-2">
+                        <a href="neutralization.html" 
+                           class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-md shadow-emerald-200 transition-all focus:ring-2 focus:ring-emerald-500">
+                            <span>과학 탐구 시작하기</span>
+                            <span class="text-base">→</span>
+                        </a>
+                        <a href="https://imuzikr.github.io/test02/" target="_blank" rel="noopener noreferrer" 
+                           class="w-full sm:w-auto inline-flex items-center justify-center px-3 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200 transition-colors"
+                           title="스프레드시트에 등록된 외부 원본 페이지 열기">
+                            <span>외부링크</span>
+                            <svg class="w-3.5 h-3.5 ml-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ==========================================
+                 카드 4 [수학 준비중]: 삼각함수와 단위원 시뮬레이터
+                 ========================================== -->
+            <article class="lesson-card bg-white/70 rounded-2xl border-2 border-dashed border-slate-300 shadow-xs hover:border-purple-300 hover:bg-white overflow-hidden flex flex-col justify-between" data-category="ready">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase bg-slate-100 text-slate-500">
+                            Math 02
+                        </span>
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                            수업 준비중
+                        </span>
+                    </div>
+
+                    <div class="flex items-start gap-4 mb-3">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-3xl shadow-inner shrink-0 opacity-80">
+                            📏
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-700">
+                                삼각함수와 단위원 탐구관
+                            </h3>
+                            <p class="text-xs font-medium text-slate-500 mt-0.5">수학 I · 삼각함수의 뜻과 그래프</p>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed mb-4">
+                        동경의 회전에 따라 변하는 단위원 위의 좌표와 사인(sin), 코사인(cos), 탄젠트(tan) 함수의 파동 그래프를 실시간으로 연결하여 탐구합니다.
+                    </p>
+
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <span class="text-xs font-medium bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg">#단위원</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg">#호도법</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg">#삼각함수그래프</span>
+                    </div>
+                </div>
+
+                <div class="p-6 pt-0 border-t border-slate-100 mt-auto bg-slate-50/50">
+                    <div class="pt-4">
+                        <button disabled 
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-200 text-slate-400 font-semibold text-sm cursor-not-allowed">
+                            <span>콘텐츠 제작 중...</span>
+                            <span class="text-xs">🔒</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ==========================================
+                 카드 5 [융합 준비중]: 빛의 굴절과 기하광학
+                 ========================================== -->
+            <article class="lesson-card bg-white/70 rounded-2xl border-2 border-dashed border-slate-300 shadow-xs hover:border-amber-300 hover:bg-white overflow-hidden flex flex-col justify-between" data-category="ready">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase bg-slate-100 text-slate-500">
+                            Sci-Math 01
+                        </span>
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            융합 준비중
+                        </span>
+                    </div>
+
+                    <div class="flex items-start gap-4 mb-3">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-3xl shadow-inner shrink-0 opacity-80">
+                            🔍
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-700">
+                                빛의 굴절과 기하광학 실험실
+                            </h3>
+                            <p class="text-xs font-medium text-slate-500 mt-0.5">물리학 I / 기하 · 빛의 경로와 렌즈</p>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed mb-4">
+                        빛의 입사각과 굴절각(스넬의 법칙)을 삼각함수와 벡터 기하학적 관점에서 분석하는 수학-과학 융합 시뮬레이션 모듈이 준비 중입니다.
+                    </p>
+
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <span class="text-xs font-medium bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg">#스넬의법칙</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg">#기하광학</span>
+                        <span class="text-xs font-medium bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg">#삼각비응용</span>
+                    </div>
+                </div>
+
+                <div class="p-6 pt-0 border-t border-slate-100 mt-auto bg-slate-50/50">
+                    <div class="pt-4">
+                        <button disabled 
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-200 text-slate-400 font-semibold text-sm cursor-not-allowed">
+                            <span>콘텐츠 제작 중...</span>
+                            <span class="text-xs">🔒</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- 검색 결과가 없을 때 메시지 -->
+        <div id="noResultsBox" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-200 my-8">
+            <div class="text-4xl mb-3">🔍</div>
+            <h4 class="text-lg font-bold text-slate-800 mb-1">검색 결과가 없습니다</h4>
+            <p class="text-sm text-slate-500 mb-4">입력하신 검색어와 일치하는 수학·과학 수업이나 개념이 없습니다.</p>
+            <button id="resetSearchBtn" class="px-4 py-2 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-lg hover:bg-indigo-100 transition-colors">
+                검색 초기화
+            </button>
+        </div>
+
+    </main>
+
+    <!-- ======================================================================
+         하단 푸터 (Footer)
+         ====================================================================== -->
+    <footer class="bg-white border-t border-slate-200 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span class="text-base">📐 🧪</span>
+                <span class="font-bold text-slate-700">SciMath Hub</span>
+                <span>• 고등학교 수학·과학 교과 연계 디지털 탐구 포털</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span>구글 스프레드시트 실시간 동기화 지원</span>
+                <a href="https://docs.google.com/spreadsheets/d/11g3-4G8SFfdClTHafM9EGkMebrsdnCx5GrTk0vulFNA/edit?usp=sharing" target="_blank" class="text-indigo-600 hover:underline">
+                    시트 바로가기 ↗
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ======================================================================
+         포털 로직 스크립트
+         ====================================================================== -->
+    <script>
+        /**
+         * 메인 로비 포털 스크립트
+         * - 구글 스프레드시트 CSV 비동기 페치 및 상태 동기화
+         * - 수학 / 과학 / 준비중 교과별 실시간 필터링
+         * - 수업명 및 수학/과학 개념 키워드 검색
+         */
+
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/11g3-4G8SFfdClTHafM9EGkMebrsdnCx5GrTk0vulFNA/export?format=csv";
+
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const cardsGrid = document.getElementById('cardsGrid');
+        const cards = Array.from(document.querySelectorAll('.lesson-card'));
+        const noResultsBox = document.getElementById('noResultsBox');
+        const resetSearchBtn = document.getElementById('resetSearchBtn');
+        const resultCountBadge = document.getElementById('resultCountBadge');
+        const totalCountSpan = document.getElementById('totalCount');
+        const refreshSheetBtn = document.getElementById('refreshSheetBtn');
+        const syncIcon = document.getElementById('syncIcon');
+        const syncStatusText = document.getElementById('syncStatusText');
+
+        let currentFilter = 'all'; 
+        let currentSearchQuery = ''; 
+
+        // 1. 구글 스프레드시트 데이터 연동
+        async function fetchGoogleSheetData() {
+            syncIcon.classList.add('animate-spin');
+            syncStatusText.textContent = '스프레드시트 확인 중...';
+
+            try {
+                const response = await fetch(GOOGLE_SHEET_CSV_URL);
+                if (!response.ok) {
+                    throw new Error('시트 응답 오류: ' + response.status);
+                }
+                const csvText = await response.text();
+                const lines = csvText.trim().split('\n');
+                const items = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const row = lines[i].split(',');
+                    if (row.length >= 2 && row[0].trim()) {
+                        items.push({
+                            title: row[0].trim(),
+                            url: row[1].trim()
+                        });
+                    }
+                }
+
+                syncStatusText.textContent = `시트 연결됨 (${items.length}개 항목 확인)`;
+            } catch (error) {
+                syncStatusText.textContent = '기본 모드로 안전하게 작동 중';
+            } finally {
+                syncIcon.classList.remove('animate-spin');
+            }
+        }
+
+        // 2. 카드 필터링 및 검색 적용
+        function updateCardVisibility() {
+            let visibleCount = 0;
+            const query = currentSearchQuery.toLowerCase().trim();
+
+            cards.forEach(card => {
+                const category = card.getAttribute('data-category');
+                const cardText = card.textContent.toLowerCase();
+
+                const matchesFilter = (currentFilter === 'all') || (category === currentFilter);
+                const matchesSearch = !query || cardText.includes(query);
+
+                if (matchesFilter && matchesSearch) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            resultCountBadge.textContent = `총 ${visibleCount}개 표시 중`;
+
+            if (visibleCount === 0) {
+                noResultsBox.classList.remove('hidden');
+            } else {
+                noResultsBox.classList.add('hidden');
+            }
+        }
+
+        // 3. 필터 버튼 이벤트
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => {
+                    b.classList.remove('bg-slate-900', 'text-white');
+                    b.classList.add('bg-white', 'text-slate-600');
+                });
+                btn.classList.remove('bg-white', 'text-slate-600');
+                btn.classList.add('bg-slate-900', 'text-white');
+
+                currentFilter = btn.getAttribute('data-filter');
+                updateCardVisibility();
+            });
+        });
+
+        // 4. 검색창 이벤트
+        searchInput.addEventListener('input', (e) => {
+            currentSearchQuery = e.target.value;
+            if (currentSearchQuery.length > 0) {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+            updateCardVisibility();
+        });
+
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            currentSearchQuery = '';
+            clearSearchBtn.classList.add('hidden');
+            updateCardVisibility();
+            searchInput.focus();
+        });
+
+        resetSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            currentSearchQuery = '';
+            clearSearchBtn.classList.add('hidden');
+            currentFilter = 'all';
+            filterButtons[0].click();
+        });
+
+        refreshSheetBtn.addEventListener('click', () => {
+            fetchGoogleSheetData();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchGoogleSheetData();
+        });
+    </script>
+</body>
+</html>

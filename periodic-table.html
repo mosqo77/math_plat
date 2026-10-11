@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>원소 주기율표 탐구관 | Science Lab Hub</title>
+    <meta name="description" content="고등학교 1학년 통합과학 원소의 주기성과 보어 원자 모형, 원자가 전자를 탐구하는 인터랙티브 가상 실험실">
+
+    <!-- 테일윈드 CSS (Tailwind CSS CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 프리텐다드 웹 폰트 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #0f172a; /* 시각적 몰입감을 높여주는 다크 네이비 배경 */
+            color: #f8fafc;
+        }
+
+        /* 18열 주기율표 CSS 그리드 레이아웃 */
+        .periodic-grid {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(54px, 1fr));
+            gap: 6px;
+        }
+
+        /* 원소 카드 기본 스타일 및 부드러운 전환 효과 */
+        .element-card {
+            aspect-ratio: 1 / 1.15;
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .element-card:hover {
+            transform: scale(1.12);
+            z-index: 20;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        /* 원소 분류별 고유 테마 색상 (글래스모피즘 스타일) */
+        .cat-alkali-metal      { background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; }
+        .cat-alkaline-earth    { background: rgba(249, 115, 22, 0.18); border: 1px solid rgba(249, 115, 22, 0.5); color: #fdba74; }
+        .cat-transition-metal  { background: rgba(234, 179, 8, 0.18); border: 1px solid rgba(234, 179, 8, 0.5); color: #fde047; }
+        .cat-post-transition    { background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(34, 197, 94, 0.5); color: #86efac; }
+        .cat-metalloid         { background: rgba(20, 184, 166, 0.18); border: 1px solid rgba(20, 184, 166, 0.5); color: #5eead4; }
+        .cat-reactive-nonmetal { background: rgba(56, 189, 248, 0.18); border: 1px solid rgba(56, 189, 248, 0.5); color: #7dd3fc; }
+        .cat-halogen           { background: rgba(99, 102, 241, 0.22); border: 1px solid rgba(99, 102, 241, 0.6); color: #a5b4fc; }
+        .cat-noble-gas         { background: rgba(168, 85, 247, 0.22); border: 1px solid rgba(168, 85, 247, 0.6); color: #d8b4fe; }
+        .cat-lanthanide        { background: rgba(236, 72, 153, 0.18); border: 1px solid rgba(236, 72, 153, 0.5); color: #f472b6; }
+        .cat-actinide          { background: rgba(244, 63, 94, 0.18); border: 1px solid rgba(244, 63, 94, 0.5); color: #fda4af; }
+
+        /* 필터링 시 비활성화된 원소의 시각적 흐림 처리 */
+        .dimmed {
+            opacity: 0.15 !important;
+            filter: grayscale(80%) !important;
+            pointer-events: none;
+        }
+
+        /* 1~20번 필수 원소 강조 테두리 효과 */
+        .essential-badge {
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            border-color: #38bdf8 !important;
+        }
+
+        /* 부드러운 스크롤바 */
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ======================================================================
+         공통 상단 내비게이션 바 (SciMath Hub 공통 헤더)
+         ====================================================================== -->
+    <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- 좌측: 로고 및 로비(index.html) 복귀 버튼 -->
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-lg p-1" title="메인 로비(전체 탐구 목록)로 이동">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+                        <span class="text-base">⚛️</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-extrabold text-base sm:text-lg tracking-tight text-white group-hover:text-indigo-400 transition-colors">SciMath Hub</span>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">수학·과학</span>
+                        </div>
+                    </div>
+                </a>
+
+                <span class="text-slate-700 hidden sm:inline">|</span>
+
+                <!-- 전체 탐구 목록 버튼 -->
+                <a href="index.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-800 border border-slate-700 transition-colors">
+                    <span>←</span>
+                    <span class="hidden sm:inline">전체 탐구 목록</span>
+                    <span class="sm:hidden">목록</span>
+                </a>
+            </div>
+
+            <!-- 중앙: 현재 탐구 표시 배지 -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/60 border border-blue-700/50 text-blue-300 text-xs font-semibold">
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                <span>Science 01 : 원소 주기율표 탐구관</span>
+            </div>
+
+            <!-- 우측: 이전(수학) / 다음(산-염기) 빠른 이동 버튼 -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="right-triangle.html" 
+                   class="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
+                   title="이전 수학 탐구: 직각삼각형이 될 조건">
+                    <span>←</span>
+                    <span class="hidden sm:inline">이전 (직각삼각형)</span>
+                    <span class="sm:hidden">직각삼각형</span>
+                </a>
+
+                <a href="neutralization.html" 
+                   class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-indigo-600/30 transition-all hover:translate-x-0.5">
+                    <span>다음 (산-염기)</span>
+                    <span class="text-base">→</span>
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ======================================================================
+         주기율표 상단 컨트롤 영역 (검색, 필터, 뷰 토글)
+         ====================================================================== -->
+    <section class="border-b border-slate-800 bg-slate-900/40 px-4 sm:px-6 lg:px-8 py-5">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            
+            <!-- 타이틀 및 소개 -->
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-900/60 text-indigo-300 border border-indigo-700/60">통합과학 1단원</span>
+                    <h1 class="text-xl sm:text-2xl font-black text-white">원소 주기율표 인터랙티브 탐구실</h1>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-400">
+                    원소를 클릭하면 <span class="text-sky-300 font-semibold">보어 원자 모형(전자 껍질 회전 애니메이션)</span>과 고1 핵심 개념을 확인할 수 있습니다.
+                </p>
+            </div>
+
+            <!-- 조작 버튼 그룹: 검색, 필수 20원소, 원자가 전자 토글 -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <!-- 실시간 검색창 -->
+                <div class="relative w-full sm:w-60">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs">🔍</span>
+                    <input type="text" id="searchInput" 
+                           placeholder="기호, 이름, 번호 (예: Na, 11)" 
+                           class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-800/90 border border-slate-700 text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+                </div>
+
+                <!-- 고1 필수 20원소 강조 버튼 -->
+                <button id="filter20Btn" type="button" 
+                        class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 flex items-center gap-1.5 transition-colors">
+                    <span>⭐ 고1 필수 20원소</span>
+                </button>
+
+                <!-- 원자가 전자 토글 버튼 -->
+                <button id="toggleValenceBtn" type="button" 
+                        class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 transition-colors">
+                    <span>⚡ 원자가 전자 표시</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- 분류별 필터 칩 (가로 스크롤 가능) -->
+        <div class="max-w-7xl mx-auto mt-4 pt-3 border-t border-slate-800/80 overflow-x-auto flex items-center gap-2 pb-1 text-xs">
+            <span class="text-slate-400 shrink-0 font-medium mr-1">분류 필터:</span>
+            <button class="filter-chip active px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-medium shrink-0" data-category="all">전체 원소</button>
+            <button class="filter-chip px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/20 shrink-0" data-category="alkali-metal">알칼리 금속</button>
+            <button class="filter-chip px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-orange-300 border border-orange-500/20 shrink-0" data-category="alkaline-earth">알칼리 토금속</button>
+            <button class="filter-chip px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/20 shrink-0" data-category="reactive-nonmetal">반응성 비금속</button>
+            <button class="filter-chip px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/20 shrink-0" data-category="halogen">할로젠</button>
+            <button class="filter-chip px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/20 shrink-0" data-category="noble-gas">비활성 기체</button>
+            <button class="filter-chip px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-500/20 shrink-0" data-category="transition-metal">전이 금속</button>
+            <button class="filter-chip px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/20 shrink-0" data-category="post-transition">전이후 금속</button>
+            <button class="filter-chip px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-500/20 shrink-0" data-category="metalloid">준금속</button>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         주기율표 메인 그리드 (Responsive & Scrollable for Tablet/PC)
+         ====================================================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 overflow-x-auto">
+        <div class="min-w-[1040px]">
+            
+            <!-- 족(Group) 번호 헤더 (1~18족) -->
+            <div class="grid grid-cols-18 gap-1.5 mb-2 text-center text-[11px] font-bold text-slate-500" style="display: grid; grid-template-columns: repeat(18, minmax(54px, 1fr));">
+                <div>1족</div><div>2족</div><div>3족</div><div>4족</div><div>5족</div><div>6족</div>
+                <div>7족</div><div>8족</div><div>9족</div><div>10족</div><div>11족</div><div>12족</div>
+                <div>13족</div><div>14족</div><div>15족</div><div>16족</div><div>17족</div><div>18족</div>
+            </div>
+
+            <!-- 원소 118개 그리드 보드 -->
+            <div id="periodicGrid" class="periodic-grid">
+                <!-- 자바스크립트로 data.js 기반 118개 원소 카드가 동적으로 렌더링됩니다 -->
+            </div>
+
+            <!-- 하단 란타넘/악티늄족 안내 -->
+            <div class="mt-4 flex items-center justify-between text-xs text-slate-500 px-2">
+                <div class="flex items-center gap-4">
+                    <span>* 57-71: 란타넘족 원소</span>
+                    <span>** 89-103: 악티늄족 원소</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                    <span>★ 표시: 고등학교 1학년 필수 학습 20대 원소</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ======================================================================
+         원소 상세 탐구 모달 (Modal Popup with Bohr Model)
+         ====================================================================== -->
+    <div id="elementModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md hidden opacity-0 transition-opacity duration-200">
+        <div class="relative w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <!-- 모달 헤더: 번호, 이름, 닫기 버튼 -->
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+                <div class="flex items-center gap-3">
+                    <span id="modalNumberTag" class="text-xs font-extrabold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        No. 1
+                    </span>
+                    <div>
+                        <div class="flex items-baseline gap-2">
+                            <h2 id="modalNameKr" class="text-2xl font-black text-white">수소</h2>
+                            <span id="modalNameEn" class="text-sm font-semibold text-slate-400">Hydrogen</span>
+                            <span id="modalSymbol" class="text-lg font-black text-indigo-400 ml-1">H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- 한국어 음성 읽기 (TTS) 버튼 -->
+                    <button id="ttsBtn" type="button" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="한국어 음성으로 원소 설명 듣기">
+                        🔊
+                    </button>
+                    <!-- 닫기 버튼 -->
+                    <button id="closeModalBtn" type="button" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="창 닫기">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- 모달 본문: 좌측 보어 원자 모형(Canvas) + 우측 화학적 상세 데이터 -->
+            <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                
+                <!-- 좌측: 실시간 보어 원자 모형 캔버스 애니메이션 -->
+                <div class="flex flex-col items-center justify-center bg-slate-950/60 p-5 rounded-2xl border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>보어 원자 모형 (전자 껍질 시뮬레이션)</span>
+                    </div>
+
+                    <div class="relative w-64 h-64 flex items-center justify-center">
+                        <canvas id="bohrCanvas" width="256" height="256" class="rounded-full shadow-inner"></canvas>
+                    </div>
+
+                    <p id="shellInfoText" class="text-xs text-slate-400 mt-3 text-center">
+                        K(2) L(8) M(1) • 전자 껍질 수: 3개 (3주기)
+                    </p>
+                </div>
+
+                <!-- 우측: 화학적 성질 및 고1 통합과학 탐구 요약 -->
+                <div class="space-y-4">
+                    <!-- 분류 및 상태 뱃지 -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="modalCategoryBadge" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                            알칼리 금속
+                        </span>
+                        <span id="modalPeriodGroupBadge" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                            3주기 · 1족
+                        </span>
+                        <span id="modalStateBadge" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                            상온 상태: 고체
+                        </span>
+                    </div>
+
+                    <!-- 원자가 전자 및 원자량 정보 카드 -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
+                            <span class="text-[11px] font-medium text-slate-400 block">원자가 전자</span>
+                            <span id="modalValenceText" class="text-xl font-black text-amber-400">1개</span>
+                            <p class="text-[10px] text-slate-500 mt-0.5">화학 반응 참여 전자</p>
+                        </div>
+                        <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
+                            <span class="text-[11px] font-medium text-slate-400 block">원자량</span>
+                            <span id="modalWeightText" class="text-xl font-black text-slate-200">22.990</span>
+                            <p class="text-[10px] text-slate-500 mt-0.5">상대적 원자 질량</p>
+                        </div>
+                    </div>
+
+                    <!-- 고1 통합과학 핵심 정리 팁 -->
+                    <div class="bg-indigo-950/40 p-4 rounded-xl border border-indigo-800/50">
+                        <div class="flex items-center gap-1.5 text-xs font-bold text-indigo-300 mb-1.5">
+                            <span>💡 고1 통합과학 탐구 노트</span>
+                        </div>
+                        <p id="modalSummaryText" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            물과 반응하여 격렬하게 수소 기체를 발생시키며, 수용액은 페놀프탈레인을 붉게 변화시킵니다.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 모달 하단 내비게이션 바: 이전/다음 원소 바로 이동 -->
+            <div class="p-4 border-t border-slate-800 bg-slate-900/90 flex items-center justify-between">
+                <button id="prevElementBtn" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5">
+                    <span>←</span>
+                    <span id="prevElementName">이전 원소</span>
+                </button>
+
+                <span class="text-xs text-slate-500">방향키(←, →)로도 이동 가능</span>
+
+                <button id="nextElementBtn" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5">
+                    <span id="nextElementName">다음 원소</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 118개 원소 데이터베이스 로드 -->
+    <script src="data.js"></script>
+
+    <!-- 주기율표 인터랙션 스크립트 -->
+    <script>
+        /**
+         * 원소 주기율표 인터랙티브 앱 스크립트
+         * - 118개 원소 그리드 생성
+         * - 보어 모형 실시간 캔버스 회전 애니메이션
+         * - 모달 제어 및 한국어 TTS 지원
+         */
+
+        const periodicGrid = document.getElementById('periodicGrid');
+        const searchInput = document.getElementById('searchInput');
+        const filter20Btn = document.getElementById('filter20Btn');
+        const toggleValenceBtn = document.getElementById('toggleValenceBtn');
+        const filterChips = document.querySelectorAll('.filter-chip');
+
+        // 모달 관련 요소들
+        const elementModal = document.getElementById('elementModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const ttsBtn = document.getElementById('ttsBtn');
+        const prevElementBtn = document.getElementById('prevElementBtn');
+        const nextElementBtn = document.getElementById('nextElementBtn');
+        const prevElementName = document.getElementById('prevElementName');
+        const nextElementName = document.getElementById('nextElementName');
+
+        const modalNumberTag = document.getElementById('modalNumberTag');
+        const modalNameKr = document.getElementById('modalNameKr');
+        const modalNameEn = document.getElementById('modalNameEn');
+        const modalSymbol = document.getElementById('modalSymbol');
+        const modalCategoryBadge = document.getElementById('modalCategoryBadge');
+        const modalPeriodGroupBadge = document.getElementById('modalPeriodGroupBadge');
+        const modalStateBadge = document.getElementById('modalStateBadge');
+        const modalValenceText = document.getElementById('modalValenceText');
+        const modalWeightText = document.getElementById('modalWeightText');
+        const modalSummaryText = document.getElementById('modalSummaryText');
+        const shellInfoText = document.getElementById('shellInfoText');
+        const bohrCanvas = document.getElementById('bohrCanvas');
+        const ctx = bohrCanvas.getContext('2d');
+
+        // 앱 상태 변수
+        let currentElementIndex = 0; // 현재 선택된 원소 인덱스 (0: 수소 ~ 117: 오가네손)
+        let showValence = false;     // 원자가 전자 표시 여부
+        let filterOnly20 = false;    // 1~20번 필수 원소만 보기 여부
+        let currentCategory = 'all'; // 현재 선택된 분류
+        let animFrameId = null;      // 캔버스 애니메이션 프레임 ID
+        let orbitAngle = 0;          // 전자 궤도 회전 각도
+
+        // 1. 주기율표 카드 렌더링 함수
+        function renderPeriodicTable() {
+            periodicGrid.innerHTML = '';
+
+            ELEMENTS_DATA.forEach((elem, index) => {
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = `element-card cat-${elem.category} rounded-xl p-1.5 flex flex-col justify-between text-left relative cursor-pointer`;
+                
+                // 그리드 행/열 위치 지정 (CSS Grid positioning)
+                card.style.gridRow = elem.gridRow;
+                card.style.gridCol = elem.gridCol;
+                card.setAttribute('data-index', index);
+                card.setAttribute('data-number', elem.number);
+                card.setAttribute('data-category', elem.category);
+
+                // 고1 필수 20원소 강조
+                const isEssential = elem.number <= 20;
+                if (isEssential) {
+                    card.classList.add('essential-badge');
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-[10px] leading-none opacity-80">
+                        <span class="font-bold">${elem.number}</span>
+                        ${isEssential ? '<span class="text-sky-300 font-extrabold text-[9px]">★</span>' : ''}
+                        <span class="valence-badge text-[9px] font-bold text-amber-300 hidden">e:${elem.valenceElectrons}</span>
+                    </div>
+                    <div class="text-center my-auto">
+                        <div class="text-base sm:text-lg font-black tracking-tight leading-none text-white">${elem.symbol}</div>
+                        <div class="text-[10px] font-semibold truncate leading-tight mt-0.5">${elem.nameKr}</div>
+                    </div>
+                    <div class="text-[9px] text-center opacity-70 leading-none truncate">${elem.weight}</div>
+                `;
+
+                card.addEventListener('click', () => {
+                    openModal(index);
+                });
+
+                periodicGrid.appendChild(card);
+            });
+        }
+
+        // 2. 모달 열기 및 보어 모형 렌더링
+        function openModal(index) {
+            currentElementIndex = index;
+            const elem = ELEMENTS_DATA[index];
+            const catInfo = CATEGORIES[elem.category] || { name: '원소' };
+
+            modalNumberTag.textContent = `No. ${elem.number}`;
+            modalNameKr.textContent = elem.nameKr;
+            modalNameEn.textContent = elem.nameEn;
+            modalSymbol.textContent = elem.symbol;
+
+            modalCategoryBadge.textContent = catInfo.name;
+            modalPeriodGroupBadge.textContent = `${elem.period}주기 · ${elem.group > 0 ? elem.group + '족' : '족 없음'}`;
+            modalStateBadge.textContent = `상온 상태: ${elem.state}`;
+
+            modalValenceText.textContent = `${elem.valenceElectrons}개`;
+            modalWeightText.textContent = elem.weight;
+            modalSummaryText.textContent = elem.summary;
+
+            // 전자 껍질 텍스트 생성
+            const shellNames = ['K', 'L', 'M', 'N', 'O', 'P', 'Q'];
+            const shellDetails = elem.shells.map((count, i) => `${shellNames[i]}(${count})`).join(' ');
+            shellInfoText.textContent = `${shellDetails} • 껍질 수: ${elem.shells.length}개 (${elem.period}주기)`;
+
+            // 이전/다음 버튼 갱신
+            const prevIdx = (index - 1 + ELEMENTS_DATA.length) % ELEMENTS_DATA.length;
+            const nextIdx = (index + 1) % ELEMENTS_DATA.length;
+            prevElementName.textContent = `${ELEMENTS_DATA[prevIdx].number}. ${ELEMENTS_DATA[prevIdx].nameKr}`;
+            nextElementName.textContent = `${ELEMENTS_DATA[nextIdx].number}. ${ELEMENTS_DATA[nextIdx].nameKr}`;
+
+            // 모달 표시 애니메이션
+            elementModal.classList.remove('hidden');
+            setTimeout(() => {
+                elementModal.classList.remove('opacity-0');
+            }, 10);
+
+            // 보어 모형 캔버스 애니메이션 시작
+            startBohrAnimation(elem);
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            elementModal.classList.add('opacity-0');
+            setTimeout(() => {
+                elementModal.classList.add('hidden');
+            }, 200);
+            if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+            }
+        }
+
+        // 3. 보어 모형 캔버스 실시간 애니메이션
+        function startBohrAnimation(elem) {
+            if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+            }
+
+            const centerX = 128;
+            const centerY = 128;
+            const shells = elem.shells; // 예: [2, 8, 1]
+            const maxRadius = 110;
+            const step = maxRadius / (shells.length + 1);
+
+            function draw() {
+                ctx.clearRect(0, 0, 256, 256);
+
+                // 원자핵 그리기 (가운데 빨간색/주황색 원)
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 14, 0, Math.PI * 2);
+                const nucleusGrad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, 14);
+                nucleusGrad.addColorStop(0, '#f87171');
+                nucleusGrad.addColorStop(1, '#dc2626');
+                ctx.fillStyle = nucleusGrad;
+                ctx.fill();
+
+                // 원자핵 텍스트 (+ 기호 또는 원자 번호)
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`+${elem.number}`, centerX, centerY);
+
+                // 각 전자 껍질 궤도와 전자들 그리기
+                shells.forEach((electronCount, shellIdx) => {
+                    const radius = step * (shellIdx + 1.2);
+
+                    // 궤도 점선
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([3, 3]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // 궤도 회전 방향 (홀수/짝수 반대로 돌아 생동감 부여)
+                    const direction = shellIdx % 2 === 0 ? 1 : -1;
+                    const angleOffset = orbitAngle * direction * (0.8 + shellIdx * 0.2);
+
+                    // 전자 그리기
+                    for (let i = 0; i < electronCount; i++) {
+                        const angle = angleOffset + (i * (2 * Math.PI / electronCount));
+                        const ex = centerX + radius * Math.cos(angle);
+                        const ey = centerY + radius * Math.sin(angle);
+
+                        // 전자 글로우 효과
+                        ctx.beginPath();
+                        ctx.arc(ex, ey, 4, 0, Math.PI * 2);
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.shadowColor = '#38bdf8';
+                        ctx.shadowBlur = 6;
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+                });
+
+                orbitAngle += 0.02;
+                animFrameId = requestAnimationFrame(draw);
+            }
+
+            draw();
+        }
+
+        // 4. 필터링 및 검색 적용 함수
+        function applyFilters() {
+            const query = searchInput.value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.element-card');
+
+            cards.forEach(card => {
+                const idx = parseInt(card.getAttribute('data-index'), 10);
+                const elem = ELEMENTS_DATA[idx];
+
+                // 검색어 일치 확인 (기호, 한국어 이름, 원자 번호)
+                const matchesSearch = !query || 
+                    elem.symbol.toLowerCase().includes(query) ||
+                    elem.nameKr.toLowerCase().includes(query) ||
+                    elem.nameEn.toLowerCase().includes(query) ||
+                    elem.number.toString() === query;
+
+                // 20번 이내 필터 확인
+                const matches20 = !filterOnly20 || elem.number <= 20;
+
+                // 화학적 분류 확인
+                const matchesCategory = (currentCategory === 'all') || (elem.category === currentCategory);
+
+                if (matchesSearch && matches20 && matchesCategory) {
+                    card.classList.remove('dimmed');
+                } else {
+                    card.classList.add('dimmed');
+                }
+            });
+        }
+
+        // 5. 한국어 음성 읽기 (TTS - Web Speech API)
+        function speakElementInfo() {
+            const elem = ELEMENTS_DATA[currentElementIndex];
+            if (!('speechSynthesis' in window)) {
+                alert('사용 중인 브라우저가 음성 읽기(TTS)를 지원하지 않습니다.');
+                return;
+            }
+
+            window.speechSynthesis.cancel(); // 이전 음성 중지
+            const textToSpeak = `원자 번호 ${elem.number}번, ${elem.nameKr}입니다. 원소 기호는 ${elem.symbol}이며, ${elem.period}주기 ${elem.group > 0 ? elem.group + '족' : ''} 원소입니다. 원자가 전자는 ${elem.valenceElectrons}개입니다. ${elem.summary}`;
+            
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'ko-KR';
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // 이벤트 리스너 등록
+        filter20Btn.addEventListener('click', () => {
+            filterOnly20 = !filterOnly20;
+            filter20Btn.classList.toggle('bg-sky-600', filterOnly20);
+            filter20Btn.classList.toggle('text-white', filterOnly20);
+            applyFilters();
+        });
+
+        toggleValenceBtn.addEventListener('click', () => {
+            showValence = !showValence;
+            toggleValenceBtn.classList.toggle('bg-amber-600', showValence);
+            toggleValenceBtn.classList.toggle('text-white', showValence);
+            
+            document.querySelectorAll('.valence-badge').forEach(badge => {
+                badge.classList.toggle('hidden', !showValence);
+            });
+        });
+
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                filterChips.forEach(c => {
+                    c.classList.remove('bg-indigo-600', 'text-white');
+                    c.classList.add('bg-slate-800');
+                });
+                chip.classList.remove('bg-slate-800');
+                chip.classList.add('bg-indigo-600', 'text-white');
+                currentCategory = chip.getAttribute('data-category');
+                applyFilters();
+            });
+        });
+
+        searchInput.addEventListener('input', applyFilters);
+
+        closeModalBtn.addEventListener('click', closeModal);
+        elementModal.addEventListener('click', (e) => {
+            if (e.target === elementModal) closeModal();
+        });
+
+        prevElementBtn.addEventListener('click', () => {
+            const prevIdx = (currentElementIndex - 1 + ELEMENTS_DATA.length) % ELEMENTS_DATA.length;
+            openModal(prevIdx);
+        });
+
+        nextElementBtn.addEventListener('click', () => {
+            const nextIdx = (currentElementIndex + 1) % ELEMENTS_DATA.length;
+            openModal(nextIdx);
+        });
+
+        ttsBtn.addEventListener('click', speakElementInfo);
+
+        // 키보드 단축키 지원 (ESC: 닫기, 화살표: 이전/다음)
+        window.addEventListener('keydown', (e) => {
+            if (!elementModal.classList.contains('hidden')) {
+                if (e.key === 'Escape') closeModal();
+                if (e.key === 'ArrowLeft') prevElementBtn.click();
+                if (e.key === 'ArrowRight') nextElementBtn.click();
+            }
+        });
+
+        // 초기 렌더링
+        renderPeriodicTable();
+    </script>
+</body>
+</html>

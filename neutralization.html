@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>산-염기 중화반응 탐구관 | Science Lab Hub</title>
+    <meta name="description" content="묽은 염산과 수산화 나트륨의 중화반응, 지시약 색 변화, 이온 수 변화 및 중화열 가상 시뮬레이션">
+
+    <!-- 테일윈드 CSS (Tailwind CSS CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 프리텐다드 웹 폰트 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* 비커 액체 높이 및 색상 변화 트랜지션 */
+        .liquid-layer {
+            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease;
+        }
+
+        /* 뷰렛 액체 방울 떨어지는 애니메이션 */
+        @keyframes dropFall {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            80% { transform: translateY(60px) scale(0.9); opacity: 1; }
+            100% { transform: translateY(75px) scale(0.3); opacity: 0; }
+        }
+        .dropping {
+            animation: dropFall 0.45s ease-in infinite;
+        }
+
+        /* 게이지 바 부드러운 이동 */
+        .gauge-bar {
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ======================================================================
+         공통 상단 내비게이션 바 (SciMath Hub 공통 헤더)
+         ====================================================================== -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- 좌측: 로고 및 로비(index.html) 복귀 버튼 -->
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-2.5 group focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg p-1" title="메인 로비(전체 탐구 목록)로 이동">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+                        <span class="text-base">🧪</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 group-hover:text-brand-600 transition-colors">SciMath Hub</span>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-100">수학·과학</span>
+                        </div>
+                    </div>
+                </a>
+
+                <span class="text-slate-300 hidden sm:inline">|</span>
+
+                <!-- 전체 탐구 목록 버튼 -->
+                <a href="index.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors">
+                    <span>←</span>
+                    <span class="hidden sm:inline">전체 탐구 목록</span>
+                    <span class="sm:hidden">목록</span>
+                </a>
+            </div>
+
+            <!-- 중앙: 현재 탐구 표시 배지 -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Science 02 : 산-염기 중화반응 탐구관</span>
+            </div>
+
+            <!-- 우측: 빠른 이동 버튼 (이전 탐구: 원소 주기율표 & 외부 원본 시트 링크) -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="periodic-table.html" 
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-colors">
+                    <span>←</span>
+                    <span>이전 (주기율표)</span>
+                </a>
+
+                <a href="https://imuzikr.github.io/test02/" target="_blank" rel="noopener noreferrer" 
+                   class="hidden lg:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors"
+                   title="스프레드시트에 등록된 외부 원본 페이지 열기">
+                    <span>외부 시뮬레이터</span>
+                    <svg class="w-3 h-3 ml-0.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ======================================================================
+         상단 수업 안내 배너 (Lesson Intro)
+         ====================================================================== -->
+    <section class="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-5">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-700">화학 I / 통합과학</span>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-900">산과 염기의 중화반응 적정 실험</h1>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600">
+                    비커 속 묽은 염산(HCl 20mL)에 수산화 나트륨(NaOH)을 첨가하며 <span class="font-bold text-blue-600">지시약 색상, 이온 수의 변화, 최고 온도(중화점)</span>를 관찰해 보세요.
+                </p>
+            </div>
+
+            <!-- 실험 컨트롤러: 지시약 선택 바 -->
+            <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 shrink-0">
+                <span class="text-xs font-bold text-slate-500 pl-2">지시약:</span>
+                <button id="btnBTB" class="indicator-btn px-3 py-1 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-xs" data-indicator="btb">
+                    BTB 용액
+                </button>
+                <button id="btnPP" class="indicator-btn px-3 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-blue-600 border border-slate-200" data-indicator="pp">
+                    페놀프탈레인
+                </button>
+                <button id="btnMO" class="indicator-btn px-3 py-1 text-xs font-semibold rounded-lg bg-white text-slate-600 hover:text-blue-600 border border-slate-200" data-indicator="mo">
+                    메틸 오렌지
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         메인 실험실 대시보드 (2단 반응형 그리드)
+         ====================================================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- ==========================================
+             좌측 5열: 가상 실험 장치 (뷰렛 + 비커)
+             ========================================== -->
+        <div class="lg:col-span-5 bg-white rounded-3xl border border-slate-200 shadow-md p-6 flex flex-col justify-between">
+            <div>
+                <!-- 상단 장치 타이틀 -->
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Virtual Experiment Apparatus</span>
+                    <span id="currentPHBadge" class="text-xs font-extrabold px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200">
+                        산성 용액 (pH &lt; 7)
+                    </span>
+                </div>
+
+                <!-- 시뮬레이션 일러스트 영역 -->
+                <div class="relative w-full h-80 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col items-center justify-center overflow-hidden">
+                    
+                    <!-- 뷰렛 (상단 NaOH 투입구) -->
+                    <div class="relative flex flex-col items-center z-10 mb-2">
+                        <div class="w-8 h-24 bg-sky-50/80 border-2 border-slate-400 rounded-t-sm flex items-end justify-center overflow-hidden relative shadow-inner">
+                            <!-- 뷰렛 내부 NaOH 용액 -->
+                            <div id="buretteLiquid" class="w-full bg-sky-200/90 transition-all duration-300" style="height: 75%;"></div>
+                            <span class="absolute top-1 text-[9px] text-slate-500 font-mono">NaOH</span>
+                        </div>
+                        <!-- 뷰렛 콕 밸브 -->
+                        <div class="w-12 h-3 bg-slate-700 rounded-xs flex items-center justify-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        </div>
+                        <!-- 노즐 -->
+                        <div class="w-2 h-4 bg-slate-400 border-x border-slate-500"></div>
+
+                        <!-- 떨어지는 액체 방울 -->
+                        <div id="dropElem" class="w-2 h-2.5 rounded-full bg-sky-400 mt-1 opacity-0"></div>
+                    </div>
+
+                    <!-- 비커 (하단 혼합 용액 비커) -->
+                    <div class="relative w-44 h-40 border-b-4 border-x-4 border-slate-400 rounded-b-2xl bg-white/40 flex items-end justify-center overflow-hidden shadow-inner z-10">
+                        <!-- 비커 내부 액체 -->
+                        <div id="beakerLiquid" class="liquid-layer w-full bg-amber-300 flex items-center justify-center text-xs font-bold text-slate-700/80 shadow-inner" style="height: 40%;">
+                            <span id="liquidVolumeText">총 20 mL</span>
+                        </div>
+                        <!-- 눈금 표시선 -->
+                        <div class="absolute inset-y-2 left-2 flex flex-col justify-between text-[9px] text-slate-400 font-mono pointer-events-none">
+                            <span>- 60mL</span>
+                            <span>- 40mL</span>
+                            <span>- 20mL</span>
+                        </div>
+                    </div>
+
+                    <!-- 받침대 -->
+                    <div class="w-56 h-3 bg-slate-600 rounded-t-sm mt-1 z-10 shadow-md"></div>
+                </div>
+            </div>
+
+            <!-- 하단 적정 조작 패널 -->
+            <div class="mt-6 space-y-4 pt-4 border-t border-slate-100">
+                <!-- NaOH 첨가량 조절 슬라이더 -->
+                <div>
+                    <div class="flex items-center justify-between text-xs font-semibold mb-1.5">
+                        <span class="text-slate-700">첨가한 0.1M NaOH 부피:</span>
+                        <span id="naohAmountDisplay" class="text-base font-black text-blue-600">0 mL</span>
+                    </div>
+                    <input type="range" id="naohSlider" min="0" max="40" value="0" step="1" 
+                           class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+                    <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
+                        <span>0mL (시작)</span>
+                        <span class="text-indigo-600 font-bold">20mL (중화점⭐)</span>
+                        <span>40mL (과량)</span>
+                    </div>
+                </div>
+
+                <!-- 빠른 조작 버튼군 -->
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="add2mLBtn" type="button" 
+                            class="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs border border-blue-200 transition-colors flex items-center justify-center gap-1">
+                        <span>+ 2 mL 주입</span>
+                    </button>
+                    <button id="reachNeutralBtn" type="button" 
+                            class="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 transition-colors flex items-center justify-center gap-1">
+                        <span>⭐ 중화점 (20mL)</span>
+                    </button>
+                    <button id="resetExpBtn" type="button" 
+                            class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs border border-slate-200 transition-colors">
+                        <span>🔄 처음으로</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==========================================
+             우측 7열: 과학적 데이터 대시보드 (이온 수, 온도, 개념)
+             ========================================== -->
+        <div class="lg:col-span-7 space-y-6">
+
+            <!-- 1. 지시약 색 변화 및 중화열 온도 게이지 -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6">
+                <h3 class="text-sm font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                    <span>🌡️ 실시간 반응 지표 (온도 & 지시약)</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- 중화열 온도 게이지 -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-600">용액의 최고 온도 (중화열)</span>
+                            <span id="tempValueText" class="text-lg font-black text-rose-600">20.0 °C</span>
+                        </div>
+                        <!-- 온도 게이지 프로그레스 바 -->
+                        <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden my-2">
+                            <div id="tempGaugeBar" class="gauge-bar h-full bg-rose-500 rounded-full" style="width: 20%;"></div>
+                        </div>
+                        <p class="text-[11px] text-slate-500">
+                            * 완전 중화점(20mL)에서 중화열이 최대로 발생하여 온도가 가장 높습니다.
+                        </p>
+                    </div>
+
+                    <!-- 지시약 색상 안내 카드 -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                                <span class="text-slate-600">현재 지시약 색상</span>
+                                <span id="indicatorColorName" class="font-bold text-amber-600">노란색 (산성)</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-2">
+                                <div id="indicatorColorSwatch" class="w-8 h-8 rounded-xl border border-slate-300 shadow-sm transition-colors duration-300 bg-amber-400"></div>
+                                <div class="text-[11px] text-slate-600 leading-tight">
+                                    <span id="indicatorGuideText">BTB: 산성(노랑) → 중성(초록) → 염기성(파랑)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 용액 속 이온 수 변화 (실시간 막대 그래프) -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                        <span>📊 용액 속 이온 수 변화</span>
+                    </h3>
+                    <span class="text-xs text-slate-500 font-medium">초기 HCl 분자 수: 10개 기준</span>
+                </div>
+
+                <!-- 4대 이온 막대 그래프 -->
+                <div class="space-y-3.5">
+                    <!-- 수소 이온 (H+) -->
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-rose-600 flex items-center gap-1">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                수소 이온 (H⁺) : 알짜 이온
+                            </span>
+                            <span id="hCount" class="font-mono font-bold text-rose-600">10개</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div id="hBar" class="gauge-bar bg-rose-500 h-full rounded-full" style="width: 50%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 수산화 이온 (OH-) -->
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-blue-600 flex items-center gap-1">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                수산화 이온 (OH⁻) : 알짜 이온
+                            </span>
+                            <span id="ohCount" class="font-mono font-bold text-blue-600">0개</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div id="ohBar" class="gauge-bar bg-blue-500 h-full rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 염화 이온 (Cl-) -->
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-emerald-600 flex items-center gap-1">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                염화 이온 (Cl⁻) : 구경꾼 이온 (일정)
+                            </span>
+                            <span id="clCount" class="font-mono font-bold text-emerald-600">10개</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div id="clBar" class="gauge-bar bg-emerald-500 h-full rounded-full" style="width: 50%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 나트륨 이온 (Na+) -->
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-purple-600 flex items-center gap-1">
+                                <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                나트륨 이온 (Na⁺) : 구경꾼 이온 (계속 증가)
+                            </span>
+                            <span id="naCount" class="font-mono font-bold text-purple-600">0개</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div id="naBar" class="gauge-bar bg-purple-500 h-full rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 생성된 물 분자 (H2O) -->
+                    <div class="pt-2 border-t border-slate-100">
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-700 flex items-center gap-1">
+                                <span>💧 생성된 물 분자 (H₂O)</span>
+                            </span>
+                            <span id="waterCount" class="font-mono font-bold text-sky-600">0개 (최대 10개)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div id="waterBar" class="gauge-bar bg-sky-400 h-full rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 고1 통합과학 & 화학 I 핵심 개념 정리 -->
+            <div class="bg-indigo-50/70 rounded-3xl border border-indigo-200/80 p-5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-base">💡</span>
+                    <h4 class="text-xs sm:text-sm font-bold text-indigo-900">핵심 화학 반응식 & 시험 필수 포인트</h4>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-indigo-950">
+                    <div class="bg-white/80 p-3 rounded-xl border border-indigo-100">
+                        <span class="font-bold text-indigo-700 block mb-0.5">알짜 이온 반응식</span>
+                        <code class="font-bold text-indigo-900 text-sm">H⁺ + OH⁻ → H₂O</code>
+                        <p class="text-[11px] text-slate-500 mt-1">1:1 몰비로 결합하여 중화열을 발생시킵니다.</p>
+                    </div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-indigo-100">
+                        <span class="font-bold text-indigo-700 block mb-0.5">구경꾼 이온</span>
+                        <code class="font-bold text-indigo-900 text-sm">Na⁺, Cl⁻</code>
+                        <p class="text-[11px] text-slate-500 mt-1">반응에 직접 참여하지 않고 용액 속에 그대로 남습니다.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ======================================================================
+         하단 푸터 (Footer)
+         ====================================================================== -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span>🧪 Science Lab Hub</span>
+                <span>• Lesson 02: 산-염기 중화반응 탐구관</span>
+            </div>
+            <div>
+                <a href="https://imuzikr.github.io/test02/" target="_blank" class="text-blue-600 hover:underline">
+                    외부 시뮬레이터 원본 열기 (test02) ↗
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ======================================================================
+         산-염기 중화반응 시뮬레이션 인터랙션 스크립트
+         ====================================================================== -->
+    <script>
+        /**
+         * 산-염기 중화반응 시뮬레이터 스크립트
+         * - NaOH 부피에 따른 H+, OH-, Na+, Cl-, H2O 수치 계산
+         * - 지시약별 실시간 색상 변화 (BTB, 페놀프탈레인, 메틸 오렌지)
+         * - 중화열 온도 곡선 계산
+         */
+
+        // DOM 요소 참조
+        const naohSlider = document.getElementById('naohSlider');
+        const naohAmountDisplay = document.getElementById('naohAmountDisplay');
+        const add2mLBtn = document.getElementById('add2mLBtn');
+        const reachNeutralBtn = document.getElementById('reachNeutralBtn');
+        const resetExpBtn = document.getElementById('resetExpBtn');
+
+        const buretteLiquid = document.getElementById('buretteLiquid');
+        const dropElem = document.getElementById('dropElem');
+        const beakerLiquid = document.getElementById('beakerLiquid');
+        const liquidVolumeText = document.getElementById('liquidVolumeText');
+        const currentPHBadge = document.getElementById('currentPHBadge');
+
+        const tempValueText = document.getElementById('tempValueText');
+        const tempGaugeBar = document.getElementById('tempGaugeBar');
+
+        const indicatorColorName = document.getElementById('indicatorColorName');
+        const indicatorColorSwatch = document.getElementById('indicatorColorSwatch');
+        const indicatorGuideText = document.getElementById('indicatorGuideText');
+        const indicatorButtons = document.querySelectorAll('.indicator-btn');
+
+        // 이온 수 및 바 요소
+        const hCount = document.getElementById('hCount');
+        const ohCount = document.getElementById('ohCount');
+        const clCount = document.getElementById('clCount');
+        const naCount = document.getElementById('naCount');
+        const waterCount = document.getElementById('waterCount');
+
+        const hBar = document.getElementById('hBar');
+        const ohBar = document.getElementById('ohBar');
+        const clBar = document.getElementById('clBar');
+        const naBar = document.getElementById('naBar');
+        const waterBar = document.getElementById('waterBar');
+
+        // 시뮬레이션 기본 파라미터
+        const INITIAL_HCL_VOLUME = 20; // 초기 HCl 부피 (20mL)
+        const INITIAL_H_COUNT = 10;    // 초기 H+ 및 Cl- 개수 (10개)
+        const NEUTRAL_VOLUME = 20;     // 완전 중화점 NaOH 부피 (20mL)
+
+        let selectedIndicator = 'btb'; // 'btb', 'pp', 'mo'
+
+        // 1. 시뮬레이션 상태 계산 및 UI 업데이트 함수
+        function updateSimulation(naohVol) {
+            naohVol = Math.max(0, Math.min(40, naohVol));
+            naohSlider.value = naohVol;
+            naohAmountDisplay.textContent = `${naohVol} mL`;
+
+            // 총 용액 부피
+            const totalVolume = INITIAL_HCL_VOLUME + naohVol;
+            liquidVolumeText.textContent = `총 ${totalVolume} mL`;
+
+            // 뷰렛 및 비커 액체 높이
+            buretteLiquid.style.height = `${Math.max(10, 80 - (naohVol * 1.5))}%`;
+            beakerLiquid.style.height = `${Math.min(95, 30 + (naohVol * 1.5))}%`;
+
+            // 이온 수 계산 (10개의 H+에 대해 20mL 투입 시 정확히 10개 투입)
+            const addedNa = Math.round((naohVol / NEUTRAL_VOLUME) * INITIAL_H_COUNT);
+            const cl = INITIAL_H_COUNT; // 구경꾼 이온, 항상 일정
+            const na = addedNa;         // 구경꾼 이온, 첨가한 만큼 비례 증가
+
+            let h = 0;
+            let oh = 0;
+            let water = 0;
+
+            if (addedNa < INITIAL_H_COUNT) {
+                // 산성 영역 (NaOH 부족)
+                h = INITIAL_H_COUNT - addedNa;
+                oh = 0;
+                water = addedNa;
+            } else if (addedNa === INITIAL_H_COUNT) {
+                // 중화점 (완전 중화)
+                h = 0;
+                oh = 0;
+                water = INITIAL_H_COUNT;
+            } else {
+                // 염기성 영역 (NaOH 과량)
+                h = 0;
+                oh = addedNa - INITIAL_H_COUNT;
+                water = INITIAL_H_COUNT;
+            }
+
+            // 이온 수 텍스트 및 막대 갱신 (최대 20개 기준 백분율)
+            hCount.textContent = `${h}개`;
+            ohCount.textContent = `${oh}개`;
+            clCount.textContent = `${cl}개`;
+            naCount.textContent = `${na}개`;
+            waterCount.textContent = `${water}개 (최대 10개)`;
+
+            hBar.style.width = `${(h / 20) * 100}%`;
+            ohBar.style.width = `${(oh / 20) * 100}%`;
+            clBar.style.width = `${(cl / 20) * 100}%`;
+            naBar.style.width = `${(na / 20) * 100}%`;
+            waterBar.style.width = `${(water / 10) * 100}%`;
+
+            // 액성 배지 및 상태 결정
+            if (naohVol < NEUTRAL_VOLUME) {
+                currentPHBadge.className = "text-xs font-extrabold px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200";
+                currentPHBadge.textContent = "산성 용액 (pH < 7)";
+            } else if (naohVol === NEUTRAL_VOLUME) {
+                currentPHBadge.className = "text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 ring-2 ring-emerald-200 animate-pulse";
+                currentPHBadge.textContent = "⭐ 완전 중화점 (pH = 7)";
+            } else {
+                currentPHBadge.className = "text-xs font-extrabold px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-200";
+                currentPHBadge.textContent = "염기성 용액 (pH > 7)";
+            }
+
+            // 중화열 온도 계산 (기본 20도에서 중화점 20mL 시 28도 최고, 그 후 과량 투입 시 식음)
+            let temp = 20.0;
+            if (naohVol <= NEUTRAL_VOLUME) {
+                temp = 20.0 + (naohVol / NEUTRAL_VOLUME) * 8.0;
+            } else {
+                temp = 28.0 - ((naohVol - NEUTRAL_VOLUME) / (40 - NEUTRAL_VOLUME)) * 3.0;
+            }
+            tempValueText.textContent = `${temp.toFixed(1)} °C`;
+            const tempPercent = Math.min(100, Math.max(10, ((temp - 18) / 12) * 100));
+            tempGaugeBar.style.width = `${tempPercent}%`;
+
+            // 지시약 색상 계산
+            applyIndicatorColor(naohVol);
+        }
+
+        // 2. 지시약에 따른 비커 및 안내 색상 적용
+        function applyIndicatorColor(naohVol) {
+            let colorHex = '#fcd34d'; // 기본
+            let colorName = '';
+
+            if (selectedIndicator === 'btb') {
+                if (naohVol < NEUTRAL_VOLUME) {
+                    colorHex = '#fbbf24'; // 노란색
+                    colorName = '노란색 (산성)';
+                } else if (naohVol === NEUTRAL_VOLUME) {
+                    colorHex = '#34d399'; // 초록색
+                    colorName = '초록색 (중성 ⭐)';
+                } else {
+                    colorHex = '#38bdf8'; // 파란색
+                    colorName = '파란색 (염기성)';
+                }
+            } else if (selectedIndicator === 'pp') { // 페놀프탈레인
+                if (naohVol <= NEUTRAL_VOLUME) {
+                    colorHex = '#f1f5f9'; // 거의 무색
+                    colorName = '무색 (산성 / 중성)';
+                } else {
+                    colorHex = '#f43f5e'; // 붉은색
+                    colorName = '붉은색 (염기성)';
+                }
+            } else if (selectedIndicator === 'mo') { // 메틸 오렌지
+                if (naohVol < NEUTRAL_VOLUME) {
+                    colorHex = '#ef4444'; // 붉은색
+                    colorName = '붉은색 (산성)';
+                } else {
+                    colorHex = '#fbbf24'; // 노란색
+                    colorName = '노란색 (중성 / 염기성)';
+                }
+            }
+
+            beakerLiquid.style.backgroundColor = colorHex;
+            indicatorColorSwatch.style.backgroundColor = colorHex;
+            indicatorColorName.textContent = colorName;
+        }
+
+        // 지시약 버튼 전환
+        indicatorButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                indicatorButtons.forEach(b => {
+                    b.classList.remove('bg-blue-600', 'text-white');
+                    b.classList.add('bg-white', 'text-slate-600');
+                });
+                btn.classList.remove('bg-white', 'text-slate-600');
+                btn.classList.add('bg-blue-600', 'text-white');
+
+                selectedIndicator = btn.getAttribute('data-indicator');
+                if (selectedIndicator === 'btb') {
+                    indicatorGuideText.textContent = 'BTB: 산성(노랑) → 중성(초록) → 염기성(파랑)';
+                } else if (selectedIndicator === 'pp') {
+                    indicatorGuideText.textContent = '페놀프탈레인: 산성/중성(무색) → 염기성(붉은색)';
+                } else if (selectedIndicator === 'mo') {
+                    indicatorGuideText.textContent = '메틸 오렌지: 산성(붉은색) → 중성/염기성(노란색)';
+                }
+                updateSimulation(parseInt(naohSlider.value, 10));
+            });
+        });
+
+        // 방울 떨어뜨리는 모션 효과
+        function triggerDropAnimation() {
+            dropElem.classList.remove('dropping', 'opacity-0');
+            void dropElem.offsetWidth; // 리플로우 강제
+            dropElem.classList.add('dropping');
+            setTimeout(() => {
+                dropElem.classList.remove('dropping');
+                dropElem.classList.add('opacity-0');
+            }, 450);
+        }
+
+        // 슬라이더 이벤트
+        naohSlider.addEventListener('input', (e) => {
+            updateSimulation(parseInt(e.target.value, 10));
+        });
+
+        // 2mL 추가 버튼
+        add2mLBtn.addEventListener('click', () => {
+            triggerDropAnimation();
+            const current = parseInt(naohSlider.value, 10);
+            updateSimulation(current + 2);
+        });
+
+        // 중화점 바로가기 버튼
+        reachNeutralBtn.addEventListener('click', () => {
+            triggerDropAnimation();
+            updateSimulation(NEUTRAL_VOLUME);
+        });
+
+        // 초기화 버튼
+        resetExpBtn.addEventListener('click', () => {
+            updateSimulation(0);
+        });
+
+        // 초기 실행
+        updateSimulation(0);
+    </script>
+</body>
+</html>
